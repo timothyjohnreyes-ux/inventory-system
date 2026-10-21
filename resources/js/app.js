@@ -4,6 +4,7 @@ let refreshProducts;
 if (productFiltersForm) {
     const searchInput = productFiltersForm.querySelector('[name="search"]');
     const categorySelect = productFiltersForm.querySelector('[name="category_id"]');
+    const sortSelect = productFiltersForm.querySelector('[name="sort"]');
     let searchTimeout;
     let activeRequest;
 
@@ -58,6 +59,15 @@ if (productFiltersForm) {
         updateProducts(url);
     };
 
+    const syncFiltersFromUrl = (url) => {
+        searchInput.value = url.searchParams.get('search') ?? '';
+        categorySelect.value = url.searchParams.get('category_id') ?? '';
+
+        const requestedSort = url.searchParams.get('sort') ?? 'newest';
+        const hasSortOption = Array.from(sortSelect.options).some((option) => option.value === requestedSort);
+        sortSelect.value = hasSortOption ? requestedSort : 'newest';
+    };
+
     searchInput?.addEventListener('input', () => {
         window.clearTimeout(searchTimeout);
         searchTimeout = window.setTimeout(submitFilters, 300);
@@ -72,10 +82,13 @@ if (productFiltersForm) {
         submitFilters();
     });
 
+    sortSelect?.addEventListener('change', () => {
+        submitFilters();
+    });
+
     window.addEventListener('popstate', () => {
         const url = new URL(window.location.href);
-        searchInput.value = url.searchParams.get('search') ?? '';
-        categorySelect.value = url.searchParams.get('category_id') ?? '';
+        syncFiltersFromUrl(url);
         updateProducts(url);
     });
 }
@@ -141,6 +154,39 @@ document.addEventListener('click', (event) => {
         closeMenus();
         openModal(modal);
 
+        if (modal.id === 'stockInModal' || modal.id === 'stockOutModal') {
+            const quantityField = modal.querySelector('[name="quantity"]');
+            const remarksField = modal.querySelector('[name="remarks"]');
+            const currentStock = Number(opener.dataset.currentStock ?? 0);
+
+            if (quantityField) {
+                quantityField.value = '';
+                quantityField.removeAttribute('max');
+            }
+
+            if (remarksField) {
+                remarksField.value = '';
+            }
+
+            const transactionDataFields = {
+                product_name: 'productName',
+                product_sku: 'productSku',
+                current_stock: 'currentStock',
+            };
+
+            Object.entries(transactionDataFields).forEach(([fieldName, dataField]) => {
+                const field = modal.querySelector(`[name="${fieldName}"]`);
+
+                if (field) {
+                    field.value = opener.dataset[dataField] ?? '';
+                }
+            });
+
+            if (modal.id === 'stockOutModal' && quantityField) {
+                quantityField.max = String(currentStock);
+            }
+        }
+
         if (opener.dataset.formAction) {
             modal.querySelector('form').action = opener.dataset.formAction;
         }
@@ -165,8 +211,7 @@ document.addEventListener('click', (event) => {
         event.preventDefault();
         if (productFiltersForm) {
             const destination = new URL(filterLink.href);
-            productFiltersForm.querySelector('[name="search"]').value = destination.searchParams.get('search') ?? '';
-            productFiltersForm.querySelector('[name="category_id"]').value = destination.searchParams.get('category_id') ?? '';
+            syncFiltersFromUrl(destination);
         }
         if (refreshProducts) {
             refreshProducts(new URL(filterLink.href));

@@ -114,7 +114,8 @@
                     type="button"
                     id="openAddProductModal"
                     data-modal-open="addProductModal"
-                    class="inline-flex w-fit items-center rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2">
+                    class="inline-flex w-fit items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-sky-600/20 transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2">
+                    <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" /></svg>
                     Add Product
                 </button>
             </div>
@@ -163,7 +164,7 @@
     id="addProductModal"
     data-modal
     class="fixed inset-0 z-50 items-center justify-center bg-slate-950/60 p-4 {{ $errors->any() && old('form_type') !== 'edit_product' ? 'flex' : 'hidden' }}">
-    <div class="w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-xl">
+    <div class="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20">
 
         {{-- Modal Header --}}
         <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
@@ -206,7 +207,7 @@
                     </label>
 
                     <input
-                        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
                         type="text"
                         name="name"
                         id="modal_name"
@@ -229,7 +230,7 @@
                     </label>
 
                     <select
-                        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
                         name="category_id"
                         id="modal_category_id">
                         <option value="">Select Category</option>
@@ -262,7 +263,7 @@
                         </label>
 
                         <input
-                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
                             type="number"
                             name="quantity"
                             id="modal_quantity"
@@ -285,7 +286,7 @@
                         </label>
 
                         <input
-                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
                             type="number"
                             name="price"
                             id="modal_price"
@@ -311,7 +312,7 @@
                     </label>
 
                     <textarea
-                        class="min-h-32 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                        class="min-h-32 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
                         name="description"
                         id="modal_description">{{ old('description') }}</textarea>
 
@@ -335,7 +336,7 @@
 
                     <button
                         type="submit"
-                        class="rounded-xl bg-amber-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2">
+                        class="rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2">
                         Add Product
                     </button>
 

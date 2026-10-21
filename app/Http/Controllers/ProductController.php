@@ -16,6 +16,23 @@ class ProductController extends Controller
         $search = $request->input('search');
         $categoryId = $request->input('category_id');
 
+        $sortOptions = [
+            'newest' => ['created_at', 'desc'],
+            'oldest' => ['created_at', 'asc'],
+            'name_asc' => ['name', 'asc'],
+            'name_desc' => ['name', 'desc'],
+            'quantity_asc' => ['quantity', 'asc'],
+            'quantity_desc' => ['quantity', 'desc'],
+            'price_asc' => ['price', 'asc'],
+            'price_desc' => ['price', 'desc'],
+        ];
+
+        $sort = $request->input('sort', 'newest');
+
+        if (! is_string($sort) || ! array_key_exists($sort, $sortOptions)) {
+            $sort = 'newest';
+        }
+
         $products = Product::query()
             ->when($search, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
@@ -26,6 +43,11 @@ class ProductController extends Controller
             ->when($categoryId, function ($query, $categoryId) {
                 $query->where('category_id', $categoryId);
             })
+            ->orderBy(
+                $sortOptions[$sort][0],
+                $sortOptions[$sort][1]
+            )
+            ->orderBy('id', $sortOptions[$sort][1])
             ->paginate(10)
             ->withQueryString();
 
@@ -35,7 +57,8 @@ class ProductController extends Controller
             'products',
             'categories',
             'search',
-            'categoryId'
+            'categoryId',
+            'sort'
         ));
     }
 

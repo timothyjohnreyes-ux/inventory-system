@@ -3,12 +3,17 @@
 @section('content')
 <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div class="min-w-0">
-        <a class="mb-3 inline-flex text-sm font-semibold text-sky-700 transition hover:text-sky-900" href="{{ route('products.index') }}">&larr; Back to Products</a>
-        <h1 class="wrap-anywhere text-3xl font-bold tracking-tight text-slate-900">{{ $product->name }}</h1>
+        <a class="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-sky-700" href="{{ route('products.index') }}">
+            <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 12H5m7 7-7-7 7-7" /></svg>
+            Back to products
+        </a>
+        <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-sky-600">Catalog / Product</p>
+        <h1 class="wrap-anywhere text-3xl font-bold tracking-tight text-slate-950">{{ $product->name }}</h1>
         <p class="mt-2 wrap-anywhere font-mono text-sm text-slate-500">{{ $product->sku }}</p>
     </div>
-    <button type="button" data-modal-open="editProductDetailModal" data-form-action="{{ route('products.update', $product->id) }}" data-name="{{ $product->name }}" data-category-id="{{ $product->category_id }}" data-quantity="{{ $product->quantity }}" data-price="{{ $product->price }}" data-description="{{ $product->description }}" class="inline-flex w-fit items-center rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
-        Edit Product
+    <button type="button" data-modal-open="editProductDetailModal" data-form-action="{{ route('products.update', $product->id) }}" data-name="{{ $product->name }}" data-category-id="{{ $product->category_id }}" data-quantity="{{ $product->quantity }}" data-price="{{ $product->price }}" data-description="{{ $product->description }}" class="inline-flex w-fit items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-sky-600/20 transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2">
+        <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m16.862 4.487 1.688-1.688a2.121 2.121 0 0 1 3 3l-9.193 9.193-4.125 1.125 1.125-4.125 7.505-7.505Z" /></svg>
+        Edit product
     </button>
 </div>
 
@@ -46,13 +51,13 @@
 </section>
 
 <div id="editProductDetailModal" data-modal class="fixed inset-0 z-50 {{ $errors->any() && old('form_type') === 'edit_product_detail' ? 'flex' : 'hidden' }} items-center justify-center bg-slate-950/60 p-4">
-    <div class="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-xl">
+    <div class="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20">
         <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
             <div>
                 <h2 class="text-xl font-bold text-slate-900">Edit Product</h2>
                 <p class="mt-1 text-sm text-slate-500">Update the product details.</p>
             </div>
-            <button type="button" data-modal-close aria-label="Close edit product dialog" class="rounded-lg px-3 py-2 text-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">&times;</button>
+            <button type="button" data-modal-close aria-label="Close edit product dialog" class="rounded-xl p-2 text-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">&times;</button>
         </div>
 
         <form action="{{ route('products.update', $product->id) }}" method="POST" class="max-h-[75vh] space-y-5 overflow-y-auto p-6">
