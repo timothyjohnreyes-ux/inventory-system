@@ -20,22 +20,33 @@
 
 <body class="min-h-screen overflow-x-hidden bg-slate-50 text-slate-800 antialiased">
     <div class="flex min-h-screen flex-col lg:flex-row">
-        <aside class="z-40 w-full shrink-0 border-b border-slate-200 bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:flex-col lg:border-b-0 lg:border-r">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-5 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500 lg:px-6 lg:py-6">
-                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-600 text-white shadow-sm shadow-sky-600/25">
-                    <svg aria-hidden="true" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm0 0v9m8-4.5-8 4.5m-8-4.5 8 4.5m0 0V21" />
-                    </svg>
-                </span>
-                <span class="min-w-0">
-                    <span class="block truncate text-lg font-bold tracking-tight text-slate-950"><span class="text-sky-600">TIM</span> Inventory</span>
-                    <span class="mt-0.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Stock management</span>
-                </span>
-            </a>
+        <aside class="relative z-40 w-full shrink-0 border-b border-slate-200 bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:flex-col lg:border-b-0 lg:border-r">
+            <div class="flex items-center justify-between">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-5 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500 lg:px-6 lg:py-6">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-600 text-white shadow-sm shadow-sky-600/25">
+                        <svg aria-hidden="true" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm0 0v9m8-4.5-8 4.5m-8-4.5 8 4.5m0 0V21" />
+                        </svg>
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block truncate text-lg font-bold tracking-tight text-slate-950"><span class="text-sky-600">TIM</span> Inventory</span>
+                        <span class="mt-0.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Stock management</span>
+                    </span>
+                </a>
 
-            <nav class="flex gap-2 overflow-x-auto px-4 pb-4 lg:block lg:flex-1 lg:space-y-1.5 lg:overflow-y-auto lg:px-4 lg:py-5" aria-label="Main navigation">
+                <button type="button" class="mr-4 inline-flex h-11 w-11 items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 lg:hidden" aria-label="Open navigation menu" aria-expanded="false" aria-controls="main-navigation" data-mobile-nav-toggle>
+                    <svg aria-hidden="true" class="h-6 w-6" data-menu-open-icon fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg aria-hidden="true" class="hidden h-6 w-6" data-menu-close-icon fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m6 6 12 12M18 6 6 18" />
+                    </svg>
+                </button>
+            </div>
+
+            <nav id="main-navigation" class="pointer-events-none absolute inset-x-0 top-full z-50 flex max-h-[80vh] -translate-y-2 flex-col gap-1 overflow-y-auto border-t border-slate-100 bg-white px-4 py-4 opacity-0 shadow-xl transition-[opacity,transform] duration-200 ease-out lg:pointer-events-auto lg:static lg:z-auto lg:max-h-none lg:flex-1 lg:translate-y-0 lg:space-y-1.5 lg:overflow-y-auto lg:border-t-0 lg:px-4 lg:py-5 lg:opacity-100 lg:shadow-none" aria-label="Main navigation" aria-hidden="true" inert>
                 <a href="{{ route('dashboard') }}" @class([
-                    'group flex min-w-max items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
+                    'group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
                     'bg-sky-600 text-white shadow-sm shadow-sky-600/20' => request()->routeIs('dashboard'),
                     'text-slate-600 hover:bg-slate-100 hover:text-slate-950' => ! request()->routeIs('dashboard'),
                 ]) @if (request()->routeIs('dashboard')) aria-current="page" @endif>
@@ -46,7 +57,7 @@
                 </a>
 
                 <a href="{{ route('products.index') }}" @class([
-                    'group flex min-w-max items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
+                    'group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
                     'bg-sky-600 text-white shadow-sm shadow-sky-600/20' => request()->routeIs('products.*'),
                     'text-slate-600 hover:bg-slate-100 hover:text-slate-950' => ! request()->routeIs('products.*'),
                 ]) @if (request()->routeIs('products.*')) aria-current="page" @endif>
@@ -57,7 +68,7 @@
                 </a>
 
                 <a href="{{ route('categories.index') }}" @class([
-                    'group flex min-w-max items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
+                    'group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
                     'bg-sky-600 text-white shadow-sm shadow-sky-600/20' => request()->routeIs('categories.*'),
                     'text-slate-600 hover:bg-slate-100 hover:text-slate-950' => ! request()->routeIs('categories.*'),
                 ]) @if (request()->routeIs('categories.*')) aria-current="page" @endif>
@@ -68,7 +79,7 @@
                 </a>
 
                 <a href="{{ route('stock-transactions.index') }}" @class([
-                    'group flex min-w-max items-center justify-between gap-5 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
+                    'group flex w-full items-center justify-between gap-5 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
                     'bg-sky-600 text-white shadow-sm shadow-sky-600/20' => request()->routeIs('stock-transactions.*'),
                     'text-slate-600 hover:bg-slate-100 hover:text-slate-950' => ! request()->routeIs('stock-transactions.*'),
                 ]) @if (request()->routeIs('stock-transactions.*')) aria-current="page" @endif>

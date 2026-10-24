@@ -1,5 +1,45 @@
 const productFiltersForm = document.getElementById('product-filters-form');
+const mobileNavigationToggle = document.querySelector('[data-mobile-nav-toggle]');
+const mobileNavigation = document.getElementById('main-navigation');
+const mobileNavigationMediaQuery = window.matchMedia('(min-width: 64rem)');
 let refreshProducts;
+
+const setMobileNavigationOpen = (isOpen) => {
+    if (!mobileNavigationToggle || !mobileNavigation) {
+        return;
+    }
+
+    const shouldBeOpen = mobileNavigationMediaQuery.matches || isOpen;
+
+    mobileNavigationToggle.setAttribute('aria-expanded', String(shouldBeOpen));
+    mobileNavigationToggle.setAttribute('aria-label', shouldBeOpen ? 'Close navigation menu' : 'Open navigation menu');
+    mobileNavigation.classList.toggle('pointer-events-none', !shouldBeOpen);
+    mobileNavigation.classList.toggle('-translate-y-2', !shouldBeOpen);
+    mobileNavigation.classList.toggle('translate-y-0', shouldBeOpen);
+    mobileNavigation.classList.toggle('opacity-0', !shouldBeOpen);
+    mobileNavigation.classList.toggle('opacity-100', shouldBeOpen);
+    mobileNavigation.setAttribute('aria-hidden', String(!shouldBeOpen));
+    mobileNavigation.inert = !shouldBeOpen;
+    mobileNavigationToggle.querySelector('[data-menu-open-icon]')?.classList.toggle('hidden', shouldBeOpen);
+    mobileNavigationToggle.querySelector('[data-menu-close-icon]')?.classList.toggle('hidden', !shouldBeOpen);
+};
+
+mobileNavigationToggle?.addEventListener('click', () => {
+    const isOpen = mobileNavigationToggle.getAttribute('aria-expanded') === 'true';
+    setMobileNavigationOpen(!isOpen);
+});
+
+mobileNavigation?.addEventListener('click', (event) => {
+    if (event.target.closest('a')) {
+        setMobileNavigationOpen(false);
+    }
+});
+
+mobileNavigationMediaQuery.addEventListener('change', ({ matches }) => {
+    setMobileNavigationOpen(matches);
+});
+
+setMobileNavigationOpen(false);
 
 if (productFiltersForm) {
     const searchInput = productFiltersForm.querySelector('[name="search"]');
@@ -239,6 +279,7 @@ document.querySelectorAll('[data-modal]').forEach((modal) => {
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
+        setMobileNavigationOpen(false);
         document.querySelectorAll('[data-modal]:not(.hidden)').forEach(closeModal);
     }
 });
