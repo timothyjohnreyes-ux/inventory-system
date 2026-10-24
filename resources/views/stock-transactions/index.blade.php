@@ -27,57 +27,72 @@
         </span>
     </div>
 
-    <div class="overflow-x-auto">
-        <table class="min-w-[900px] w-full divide-y divide-slate-200 text-left text-sm">
-            <thead class="bg-slate-50/80 text-[11px] uppercase tracking-[0.12em] text-slate-500">
+    <div>
+        <table class="w-full table-fixed divide-y divide-slate-200 text-left text-xs sm:text-sm">
+            <colgroup>
+                <col class="w-[9%]">
+                <col class="w-[18%]">
+                <col class="w-[11%]">
+                <col class="w-[12%]">
+                <col class="w-[10%]">
+                <col class="w-[13%]">
+                <col class="w-[27%]">
+            </colgroup>
+            <thead class="bg-slate-50/80 text-[10px] uppercase tracking-wide text-slate-500 sm:text-[11px] sm:tracking-[0.12em]">
                 <tr>
-                    <th scope="col" class="whitespace-nowrap px-5 py-3.5 font-semibold">Transaction</th>
-                    <th scope="col" class="whitespace-nowrap px-5 py-3.5 font-semibold">Product</th>
-                    <th scope="col" class="whitespace-nowrap px-5 py-3.5 font-semibold">SKU</th>
-                    <th scope="col" class="whitespace-nowrap px-5 py-3.5 font-semibold">Movement</th>
-                    <th scope="col" class="whitespace-nowrap px-5 py-3.5 text-right font-semibold">Quantity</th>
-                    <th scope="col" class="px-5 py-3.5 font-semibold">Remarks</th>
-                    <th scope="col" class="whitespace-nowrap px-5 py-3.5 font-semibold">Date</th>
+                    <th scope="col" class="px-1 py-2 font-semibold sm:px-2 sm:py-3.5">ID</th>
+                    <th scope="col" class="px-1 py-2 font-semibold sm:px-2 sm:py-3.5">Product</th>
+                    <th scope="col" class="px-1 py-2 font-semibold sm:px-2 sm:py-3.5">SKU</th>
+                    <th scope="col" class="px-1 py-2 font-semibold sm:px-2 sm:py-3.5">Move</th>
+                    <th scope="col" class="px-1 py-2 text-right font-semibold sm:px-2 sm:py-3.5">Qty</th>
+                    <th scope="col" class="px-1 py-2 font-semibold sm:px-2 sm:py-3.5">Remarks</th>
+                    <th scope="col" class="px-1 py-2 font-semibold sm:px-2 sm:py-3.5">Created at</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 bg-white">
                 @forelse ($transactions as $transaction)
                     <tr class="transition-colors hover:bg-sky-50/50">
-                        <td class="whitespace-nowrap px-5 py-4">
-                            <span class="rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-xs font-semibold text-slate-600">#{{ $transaction->id }}</span>
+                        <td class="overflow-hidden px-1 py-2 sm:px-2 sm:py-3.5">
+                            <span class="font-mono text-[10px] font-semibold text-slate-600 sm:text-xs">#{{ $transaction->id }}</span>
                         </td>
-                        <td class="max-w-56 truncate px-5 py-4 font-semibold text-slate-900" title="{{ $transaction->product?->name ?? 'Product unavailable' }}">{{ $transaction->product?->name ?? 'Product unavailable' }}</td>
-                        <td class="max-w-40 truncate px-5 py-4 font-mono text-xs text-slate-500" title="{{ $transaction->product?->sku ?? 'N/A' }}">{{ $transaction->product?->sku ?? 'N/A' }}</td>
-                        <td class="whitespace-nowrap px-5 py-4">
+                        <td class="overflow-hidden px-1 py-2 font-semibold text-slate-900 sm:px-2 sm:py-3.5" title="{{ $transaction->product?->name ?? 'Product unavailable' }}">
+                            <span class="block truncate">{{ $transaction->product?->name ?? 'Product unavailable' }}</span>
+                        </td>
+                        <td class="overflow-hidden px-1 py-2 font-mono text-[10px] text-slate-500 sm:px-2 sm:py-3.5 sm:text-xs" title="{{ $transaction->product?->sku ?? 'N/A' }}">
+                            <span class="block truncate">{{ $transaction->product?->sku ?? 'N/A' }}</span>
+                        </td>
+                        <td class="overflow-hidden px-1 py-2 sm:px-2 sm:py-3.5">
                             @if ($transaction->type === 'in')
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
-                                    <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" /></svg>
-                                    Stock in
+                                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-1 py-1 text-[10px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200 sm:gap-1.5 sm:px-2.5 sm:text-xs">
+                                    <svg aria-hidden="true" class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" /></svg>
+                                    <span class="sm:hidden">In</span><span class="hidden sm:inline">Stock in</span>
                                 </span>
                             @else
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 ring-1 ring-inset ring-orange-200">
-                                    <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14" /></svg>
-                                    Stock out
+                                <span class="inline-flex items-center gap-1 rounded-full bg-orange-50 px-1 py-1 text-[10px] font-semibold text-orange-700 ring-1 ring-inset ring-orange-200 sm:gap-1.5 sm:px-2.5 sm:text-xs">
+                                    <svg aria-hidden="true" class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14" /></svg>
+                                    <span class="sm:hidden">Out</span><span class="hidden sm:inline">Stock out</span>
                                 </span>
                             @endif
                         </td>
-                        <td class="whitespace-nowrap px-5 py-4 text-right font-bold {{ $transaction->type === 'in' ? 'text-emerald-700' : 'text-orange-700' }}">
+                        <td class="overflow-hidden px-1 py-2 text-right font-bold text-[10px] sm:px-2 sm:py-3.5 sm:text-sm {{ $transaction->type === 'in' ? 'text-emerald-700' : 'text-orange-700' }}">
                             @if ($transaction->type === 'in')
                                 +{{ number_format($transaction->quantity) }}
                             @else
                                 &minus;{{ number_format($transaction->quantity) }}
                             @endif
                         </td>
-                        <td class="max-w-64 truncate px-5 py-4 text-slate-600" title="{{ $transaction->remarks ?? '' }}">
-                            @if (filled($transaction->remarks))
-                                {{ $transaction->remarks }}
-                            @else
-                                &mdash;
-                            @endif
+                        <td class="overflow-hidden px-1 py-2 text-slate-600 sm:px-2 sm:py-3.5" title="{{ $transaction->remarks ?? '' }}">
+                            <span class="block truncate">
+                                @if (filled($transaction->remarks))
+                                    {{ $transaction->remarks }}
+                                @else
+                                    &mdash;
+                                @endif
+                            </span>
                         </td>
-                        <td class="whitespace-nowrap px-5 py-4">
-                            <span class="block font-medium text-slate-700">{{ $transaction->created_at->format('M d, Y') }}</span>
-                            <span class="mt-0.5 block text-xs text-slate-400">{{ $transaction->created_at->format('h:i A') }}</span>
+                        <td class="px-1 py-2 text-[10px] sm:px-2 sm:py-3.5 sm:text-xs">
+                            <span class="block font-medium leading-tight text-slate-700">{{ $transaction->created_at->format('M d, Y') }}</span>
+                            <span class="mt-0.5 block leading-tight text-slate-400">{{ $transaction->created_at->format('h:i A') }}</span>
                         </td>
                     </tr>
                 @empty

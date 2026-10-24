@@ -205,7 +205,7 @@ document.addEventListener('click', (event) => {
         return;
     }
 
-    const filterLink = event.target.closest('#active-product-filters a, #product-pagination a');
+    const filterLink = event.target.closest('#product-pagination a');
 
     if (filterLink) {
         event.preventDefault();
