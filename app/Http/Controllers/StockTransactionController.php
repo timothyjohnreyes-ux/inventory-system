@@ -38,6 +38,12 @@ class StockTransactionController extends Controller
 
             $quantity = (int) $validated['quantity'];
 
+            if ($validated['type'] === 'in' && ! $product->is_active) {
+                throw ValidationException::withMessages([
+                    'quantity' => 'Stock in is not allowed for archived products.',
+                ]);
+            }
+
             // Step 3: Update the product quantity
             if ($validated['type'] === 'out') {
                 if ($product->quantity < $quantity) {
@@ -63,7 +69,9 @@ class StockTransactionController extends Controller
 
         // Step 5: Return a success message
         return redirect()
-            ->route('products.index')
+            ->route('products.index', [
+                'status' => $request->input('return_status', 'active'),
+            ])
             ->with('success', 'Stock transaction recorded successfully.');
     }
 

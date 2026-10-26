@@ -13,6 +13,8 @@ Route::get('/', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::resource('products', ProductController::class);
+Route::patch('/products/{id}/toggle-status', [ProductController::class, 'toggleStatus'])
+    ->name('products.toggle-status');
 
 Route::resource('categories', CategoryController::class);
 

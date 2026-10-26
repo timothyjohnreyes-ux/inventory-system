@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\StockTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -15,6 +17,12 @@ class ProductController extends Controller
     {
         $search = $request->input('search');
         $categoryId = $request->input('category_id');
+
+        $status = $request->input('status', 'active');
+
+        if (! in_array($status, ['active', 'archived'], true)) {
+            $status = 'active';
+        }
 
         $sortOptions = [
             'newest' => ['created_at', 'desc'],
@@ -33,7 +41,12 @@ class ProductController extends Controller
             $sort = 'newest';
         }
 
-        $products = Product::query()
+        $products = Product::query()->when($status === 'active', function ($query) {
+            $query->where('is_active', true);
+        })
+            ->when($status === 'archived', function ($query) {
+                $query->where('is_active', false);
+            })
             ->when($search, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -58,6 +71,7 @@ class ProductController extends Controller
             'categories',
             'search',
             'categoryId',
+            'status',
             'sort'
         ));
     }
@@ -92,7 +106,18 @@ class ProductController extends Controller
         // Add the generated SKU to the validated data
         $validated['sku'] = $sku;
 
-        Product::create($validated);
+        DB::transaction(function () use ($validated) {
+            $product = Product::create($validated);
+
+            if ($product->quantity > 0) {
+                StockTransaction::create([
+                    'product_id' => $product->id,
+                    'type' => 'in',
+                    'quantity' => $product->quantity,
+                    'remarks' => 'Initial stock',
+                ]);
+            }
+        });
 
         return redirect()->route('products.index')->with('success', 'Product added successfully!');
     }
@@ -130,7 +155,6 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required',
             'category_id' => 'required|exists:categories,id',
-            'quantity' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0|max:99999999.99|decimal:0,2',
             'description' => 'nullable|string',
         ]);
@@ -157,10 +181,36 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
 
+        if ($product->quantity > 0) {
+            return redirect()
+                ->route('products.index')
+                ->with('error', 'Cannot delete this product because it still has stock.');
+        }
+
+        if ($product->stockTransactions()->exists()) {
+            return redirect()
+                ->route('products.index')
+                ->with('error', 'Cannot delete this product because it has stock transaction history. Deactivate it instead.');
+        }
+
         $product->delete();
 
         return redirect()
             ->route('products.index')
             ->with('success', 'Product deleted successfully!');
+    }
+
+    public function toggleStatus(string $id)
+    {
+        $product = Product::findOrFail($id);
+
+        $product->is_active = ! $product->is_active;
+        $product->save();
+
+        $status = $product->is_active ? 'activated' : 'deactivated';
+
+        return redirect()
+            ->route('products.index')
+            ->with('success', "Product {$status} successfully!");
     }
 }

@@ -18,12 +18,14 @@ class Product extends Model
         'quantity',
         'price',
         'description',
+        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
+            'is_active' => 'boolean',
         ];
     }
 

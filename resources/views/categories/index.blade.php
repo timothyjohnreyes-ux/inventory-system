@@ -57,11 +57,13 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19.5 7.5 16.5 4.5" />
                                 </svg>
                             </button>
+                            {{-- Delete category action temporarily disabled.
                             <button type="button" data-modal-open="deleteCategoryModal" data-form-action="{{ route('categories.destroy', $category->id) }}" data-delete-name="{{ $category->name }}" aria-label="Delete {{ $category->name }}" title="Delete category" class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-rose-600 transition hover:bg-rose-50 hover:text-rose-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400">
                                 <svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 10v6m4-6v6" />
                                 </svg>
                             </button>
+                            --}}
                         </div>
                     </td>
                 </tr>
@@ -86,6 +88,7 @@
     <div class="mt-6">{{ $categories->links() }}</div>
 @endif
 
+{{-- Delete Category Modal (temporarily disabled)
 <div id="deleteCategoryModal" data-modal class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4">
     <div class="w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20">
         <div class="p-5">
@@ -93,6 +96,7 @@
             <h2 class="text-lg font-semibold text-slate-900">Delete category?</h2>
             <p class="mt-2 text-sm leading-6 text-slate-600">Are you sure you want to delete <span data-modal-field="deleteName" class="font-semibold text-slate-900"></span>? This action cannot be undone.</p>
         </div>
+        --}}
         <form action="{{ route('categories.destroy', 0) }}" method="POST" class="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4">
             @csrf
             @method('DELETE')

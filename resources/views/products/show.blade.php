@@ -91,7 +91,12 @@
                 </div>
                 <div>
                     <label for="detail_product_quantity" class="mb-1.5 block text-sm font-semibold text-slate-700">Quantity</label>
-                    <input id="detail_product_quantity" name="quantity" data-modal-field="quantity" type="number" min="0" value="{{ old('quantity', $product->quantity) }}" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    <div class="group relative">
+                        <input id="detail_product_quantity" data-modal-field="quantity" type="number" min="0" value="{{ old('quantity', $product->quantity) }}" readonly aria-describedby="detail-product-quantity-tooltip" class="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm text-slate-500">
+                        <span id="detail-product-quantity-tooltip" role="tooltip" class="pointer-events-none absolute bottom-full left-0 z-10 mb-2 w-max max-w-64 rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity duration-75 group-hover:opacity-100 group-focus-within:opacity-100">
+                            Quantity is managed through stock in and stock out transactions.
+                        </span>
+                    </div>
                     @if (old('form_type') === 'edit_product_detail')
                         @error('quantity') <p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p> @enderror
                     @endif

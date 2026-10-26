@@ -13,12 +13,29 @@
         id="openAddProductModal"
         data-modal-open="addProductModal"
         class="inline-flex w-fit items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-sky-600/20 transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2">
-        <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" /></svg>
+        <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" />
+        </svg>
         Add product
     </button>
 </div>
 
 <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="product-filters-heading">
+
+    <div class="mb-5 flex flex-wrap gap-2" role="navigation" aria-label="Product status">
+        <a
+            href="{{ route('products.index', array_merge(request()->except('page', 'status'), ['status' => 'active'])) }}"
+            class="inline-flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition {{ $status === 'active' ? 'bg-sky-600 text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50' }}">
+            Active Products
+        </a>
+
+        <a
+            href="{{ route('products.index', array_merge(request()->except('page', 'status'), ['status' => 'archived'])) }}"
+            class="inline-flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition {{ $status === 'archived' ? 'bg-sky-600 text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50' }}">
+            Archived Products
+        </a>
+    </div>
+
     <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
             <h2 id="product-filters-heading" class="text-base font-semibold text-slate-900">Find products</h2>
@@ -30,6 +47,7 @@
     </div>
 
     <form id="product-filters-form" action="{{ route('products.index') }}" method="GET" class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,0.55fr)_minmax(12rem,0.55fr)_auto] sm:items-end">
+        <input type="hidden" name="status" value="{{ $status }}">
         <div>
             <label for="product-search" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Search</label>
             <input
@@ -99,7 +117,7 @@
             </select>
         </div>
 
-        <a href="{{ route('products.index', ['sort' => $sort]) }}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
+        <a href="{{ route('products.index', ['status' => $status, 'sort' => $sort]) }}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
             Clear
         </a>
     </form>
@@ -110,19 +128,19 @@
     <div class="mb-4 flex flex-wrap items-center gap-2" aria-label="Active filters">
         <span class="text-sm font-medium text-slate-500">Active filters:</span>
         @if (filled($search))
-        <a href="{{ route('products.index', array_filter(['category_id' => $categoryId, 'sort' => $sort])) }}" class="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-800 ring-1 ring-inset ring-sky-200 hover:bg-sky-100">
+        <a href="{{ route('products.index', array_filter(['category_id' => $categoryId, 'sort' => $sort, 'status' => $status])) }}" class="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-800 ring-1 ring-inset ring-sky-200 hover:bg-sky-100">
             Search: {{ $search }} <span aria-hidden="true" class="text-sky-600">&times;</span>
         </a>
         @endif
         @if (filled($categoryId))
         @php($activeCategory = $categories->firstWhere('id', $categoryId))
         @if ($activeCategory)
-        <a href="{{ route('products.index', array_filter(['search' => $search, 'sort' => $sort])) }}" class="inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1.5 text-sm font-medium text-violet-800 ring-1 ring-inset ring-violet-200 hover:bg-violet-100">
+        <a href="{{ route('products.index', array_filter(['search' => $search, 'sort' => $sort, 'status' => $status])) }}" class="inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1.5 text-sm font-medium text-violet-800 ring-1 ring-inset ring-violet-200 hover:bg-violet-100">
             Category: {{ $activeCategory->name }} <span aria-hidden="true" class="text-violet-600">&times;</span>
         </a>
         @endif
         @endif
-        <a href="{{ route('products.index', ['sort' => $sort]) }}" class="px-2 py-1.5 text-sm font-semibold text-slate-600 underline decoration-slate-300 underline-offset-4 hover:text-slate-900">Clear all</a>
+        <a href="{{ route('products.index', ['status' => $status, 'sort' => $sort]) }}" class="px-2 py-1.5 text-sm font-semibold text-slate-600 underline decoration-slate-300 underline-offset-4 hover:text-slate-900">Clear all</a>
     </div>
     @endif
 </div>
@@ -144,16 +162,23 @@
             @forelse($products as $product)
             <tr class="border-b border-slate-100 transition-colors hover:bg-sky-50/60">
                 <td class="whitespace-nowrap px-4 py-3.5 text-xs font-semibold text-slate-400">#{{ $product->id }}</td>
-                <td class="max-w-56 truncate px-4 py-3.5 font-semibold text-slate-900" title="{{ $product->name }}">{{ $product->name }}</td>
+                <td class="max-w-56 px-4 py-3.5 font-semibold text-slate-900" title="{{ $product->name }}">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="truncate">{{ $product->name }}</span>
+                        @if (! $product->is_active)
+                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 ring-1 ring-inset ring-slate-200">Archived</span>
+                        @endif
+                    </div>
+                </td>
                 <td class="max-w-36 truncate px-4 py-3.5 font-mono text-xs text-slate-500" title="{{ $product->sku }}">{{ $product->sku }}</td>
                 <td class="whitespace-nowrap px-4 py-3.5">
                     <div class="flex items-center gap-2">
                         <span class="font-semibold text-slate-800">{{ number_format($product->quantity) }}</span>
                         @if ((int) $product->quantity === 0)
-                            <span class="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700 ring-1 ring-inset ring-rose-200">Out</span>
+                        <span class="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700 ring-1 ring-inset ring-rose-200">Out</span>
                         @elseif ($product->quantity <= 10)
                             <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-200">Low</span>
-                        @endif
+                            @endif
                     </div>
                 </td>
                 <td class="whitespace-nowrap px-4 py-3.5 text-right font-semibold text-slate-900">&#8369;{{ number_format((float) $product->price, 2) }}</td>
@@ -169,25 +194,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
                         </a>
-                        <button
-                            type="button"
-                            data-modal-open="editProductModal"
-                            data-form-action="{{ route('products.update', $product->id) }}"
-                            data-edit-product-id="{{ $product->id }}"
-                            data-name="{{ $product->name }}"
-                            data-sku="{{ $product->sku }}"
-                            data-category-id="{{ $product->category_id }}"
-                            data-quantity="{{ $product->quantity }}"
-                            data-price="{{ $product->price }}"
-                            data-description="{{ $product->description }}"
-                            aria-label="Edit {{ $product->name }}"
-                            title="Edit product"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
-                            <svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m16.862 4.487 1.688-1.688a2.121 2.121 0 0 1 3 3l-9.193 9.193-4.125 1.125 1.125-4.125 7.505-7.505Z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19.5 7.5 16.5 4.5" />
-                            </svg>
-                        </button>
+                        {{-- Delete product action temporarily disabled.
                         <button
                             type="button"
                             data-modal-open="deleteProductModal"
@@ -200,6 +207,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 10v6m4-6v6" />
                             </svg>
                         </button>
+                        --}}
+                        @if ($product->is_active)
                         <button
                             type="button"
                             data-modal-open="stockInModal"
@@ -214,6 +223,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" />
                             </svg>
                         </button>
+                        @endif
+                        @if ($product->is_active || $product->quantity > 0)
                         <button
                             type="button"
                             data-modal-open="stockOutModal"
@@ -228,6 +239,37 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14" />
                             </svg>
                         </button>
+                        @endif
+                        <div data-menu class="relative">
+                            <button type="button" data-menu-toggle aria-label="More actions for {{ $product->name }}" title="More actions" class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
+                                <svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01" />
+                                </svg>
+                            </button>
+                            <div data-menu-content class="fixed z-50 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg shadow-slate-900/10">
+                                <button
+                                    type="button"
+                                    data-modal-open="editProductModal"
+                                    data-form-action="{{ route('products.update', $product->id) }}"
+                                    data-edit-product-id="{{ $product->id }}"
+                                    data-name="{{ $product->name }}"
+                                    data-sku="{{ $product->sku }}"
+                                    data-category-id="{{ $product->category_id }}"
+                                    data-quantity="{{ $product->quantity }}"
+                                    data-price="{{ $product->price }}"
+                                    data-description="{{ $product->description }}"
+                                    class="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50">
+                                    Edit
+                                </button>
+                                <form action="{{ route('products.toggle-status', $product->id) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm font-medium {{ $product->is_active ? 'text-amber-700 hover:bg-amber-50' : 'text-emerald-700 hover:bg-emerald-50' }}">
+                                        {{ $product->is_active ? 'Archive' : 'Reactivate' }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </td>
 
@@ -250,7 +292,7 @@
     {{ $products->links() }}
 </div>
 
-{{-- Delete Product Modal --}}
+{{-- Delete Product Modal (temporarily disabled)
 <div id="deleteProductModal" data-modal class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4">
     <div class="w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20">
         <div class="p-5">
@@ -266,6 +308,7 @@
         </form>
     </div>
 </div>
+--}}
 
 {{-- Stock In Modal --}}
 <div
@@ -288,6 +331,7 @@
             <input type="hidden" name="product_name" value="{{ old('form_type') === 'stock_transaction' && old('type') === 'in' ? old('product_name') : '' }}">
             <input type="hidden" name="product_sku" value="{{ old('form_type') === 'stock_transaction' && old('type') === 'in' ? old('product_sku') : '' }}">
             <input type="hidden" name="current_stock" value="{{ old('form_type') === 'stock_transaction' && old('type') === 'in' ? old('current_stock') : '' }}">
+            <input type="hidden" name="return_status" value="{{ $status }}">
             <input type="hidden" name="type" value="in">
 
             <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
@@ -347,6 +391,7 @@
             <input type="hidden" name="product_name" value="{{ old('form_type') === 'stock_transaction' && old('type') === 'out' ? old('product_name') : '' }}">
             <input type="hidden" name="product_sku" value="{{ old('form_type') === 'stock_transaction' && old('type') === 'out' ? old('product_sku') : '' }}">
             <input type="hidden" name="current_stock" value="{{ old('form_type') === 'stock_transaction' && old('type') === 'out' ? old('current_stock') : '' }}">
+            <input type="hidden" name="return_status" value="{{ $status }}">
             <input type="hidden" name="type" value="out">
 
             <div class="rounded-xl border border-orange-100 bg-orange-50 p-4">
@@ -632,7 +677,12 @@
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700" for="edit_product_quantity">Quantity</label>
-                    <input data-modal-field="quantity" id="edit_product_quantity" name="quantity" type="number" min="0" value="{{ old('quantity') }}" required class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    <div class="group relative">
+                        <input data-modal-field="quantity" id="edit_product_quantity" name="quantity" type="number" min="0" value="{{ old('quantity') }}" required readonly aria-describedby="edit-product-quantity-tooltip" class="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500">
+                        <span id="edit-product-quantity-tooltip" role="tooltip" class="pointer-events-none absolute bottom-full left-0 z-10 mb-2 w-max max-w-64 rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity duration-75 group-hover:opacity-100 group-focus-within:opacity-100">
+                            Quantity is managed through stock in and stock out transactions.
+                        </span>
+                    </div>
                     @if(old('form_type') === 'edit_product')
                     @error('quantity') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
                     @endif

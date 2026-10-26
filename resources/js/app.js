@@ -45,6 +45,7 @@ if (productFiltersForm) {
     const searchInput = productFiltersForm.querySelector('[name="search"]');
     const categorySelect = productFiltersForm.querySelector('[name="category_id"]');
     const sortSelect = productFiltersForm.querySelector('[name="sort"]');
+    const statusInput = productFiltersForm.querySelector('[name="status"]');
     let searchTimeout;
     let activeRequest;
 
@@ -102,6 +103,7 @@ if (productFiltersForm) {
     const syncFiltersFromUrl = (url) => {
         searchInput.value = url.searchParams.get('search') ?? '';
         categorySelect.value = url.searchParams.get('category_id') ?? '';
+        statusInput.value = url.searchParams.get('status') ?? 'active';
 
         const requestedSort = url.searchParams.get('sort') ?? 'newest';
         const hasSortOption = Array.from(sortSelect.options).some((option) => option.value === requestedSort);
