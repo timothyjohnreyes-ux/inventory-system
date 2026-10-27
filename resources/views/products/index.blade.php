@@ -194,20 +194,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
                         </a>
-                        {{-- Delete product action temporarily disabled.
-                        <button
-                            type="button"
-                            data-modal-open="deleteProductModal"
-                            data-form-action="{{ route('products.destroy', $product->id) }}"
-                            data-delete-name="{{ $product->name }}"
-                            aria-label="Delete {{ $product->name }}"
-                            title="Delete product"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-rose-600 transition hover:bg-rose-50 hover:text-rose-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400">
-                            <svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 10v6m4-6v6" />
-                            </svg>
-                        </button>
-                        --}}
                         @if ($product->is_active)
                         <button
                             type="button"
@@ -291,24 +277,6 @@
 <div id="product-pagination" class="mt-6">
     {{ $products->links() }}
 </div>
-
-{{-- Delete Product Modal (temporarily disabled)
-<div id="deleteProductModal" data-modal class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4">
-    <div class="w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20">
-        <div class="p-5">
-            <div class="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-lg font-bold text-rose-600">!</div>
-            <h2 class="text-lg font-semibold text-slate-900">Delete product?</h2>
-            <p class="mt-2 text-sm leading-6 text-slate-600">Are you sure you want to delete <span data-modal-field="deleteName" class="font-semibold text-slate-900"></span>? This action cannot be undone.</p>
-        </div>
-        <form action="{{ route('products.destroy', 0) }}" method="POST" class="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4">
-            @csrf
-            @method('DELETE')
-            <button type="button" data-modal-close class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
-            <button type="submit" class="rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700">Delete</button>
-        </form>
-    </div>
-</div>
---}}
 
 {{-- Stock In Modal --}}
 <div
@@ -678,14 +646,12 @@
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700" for="edit_product_quantity">Quantity</label>
                     <div class="group relative">
-                        <input data-modal-field="quantity" id="edit_product_quantity" name="quantity" type="number" min="0" value="{{ old('quantity') }}" required readonly aria-describedby="edit-product-quantity-tooltip" class="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500">
+                        <input data-modal-field="quantity" id="edit_product_quantity" type="number" min="0" value="{{ old('quantity', $products->getCollection()->firstWhere('id', old('edit_product_id'))?->quantity ?? '') }}" readonly aria-describedby="edit-product-quantity-tooltip" class="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500">
                         <span id="edit-product-quantity-tooltip" role="tooltip" class="pointer-events-none absolute bottom-full left-0 z-10 mb-2 w-max max-w-64 rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity duration-75 group-hover:opacity-100 group-focus-within:opacity-100">
                             Quantity is managed through stock in and stock out transactions.
                         </span>
                     </div>
-                    @if(old('form_type') === 'edit_product')
-                    @error('quantity') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
-                    @endif
+
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700" for="edit_product_price">Price (&#8369;)</label>

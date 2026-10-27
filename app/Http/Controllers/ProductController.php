@@ -174,31 +174,6 @@ class ProductController extends Controller
             ->with('success', 'Product updated successfully!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        $product = Product::findOrFail($id);
-
-        if ($product->quantity > 0) {
-            return redirect()
-                ->route('products.index')
-                ->with('error', 'Cannot delete this product because it still has stock.');
-        }
-
-        if ($product->stockTransactions()->exists()) {
-            return redirect()
-                ->route('products.index')
-                ->with('error', 'Cannot delete this product because it has stock transaction history. Deactivate it instead.');
-        }
-
-        $product->delete();
-
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product deleted successfully!');
-    }
 
     public function toggleStatus(string $id)
     {

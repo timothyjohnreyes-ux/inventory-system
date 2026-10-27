@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -12,20 +11,27 @@ class DashboardController extends Controller
     {
         $categories = Category::all();
 
-        $totalProducts = Product::count();
+        $totalProducts = Product::where('is_active', true)->count();
         $totalCategories = Category::count();
         $totalQuantity = Product::sum('quantity');
 
         $inventoryValue = Product::selectRaw('SUM(quantity * price) as total')->value('total') ?? 0;
 
-        $lowStockProducts = Product::where('quantity', '<=', 10)->count();
+        $lowStockProducts = Product::where('is_active', true)
+            ->where('quantity', '<=', 10)
+            ->count();
 
-        $outOfStockProducts = Product::where('quantity', 0)->count();
+        $outOfStockProducts = Product::where('is_active', true)
+            ->where('quantity', 0)
+            ->count();
 
-        $recentProducts = Product::with('category')->latest()->take(5)->get();
+        $recentProducts = Product::where('is_active', true)
+            ->with('category')
+            ->latest()
+            ->take(5)
+            ->get();
 
         return view('dashboard', compact(
-            
             'totalProducts',
             'totalCategories',
             'totalQuantity',
@@ -34,7 +40,6 @@ class DashboardController extends Controller
             'outOfStockProducts',
             'recentProducts',
             'categories'
-        ) );
-
+        ));
     }
 }

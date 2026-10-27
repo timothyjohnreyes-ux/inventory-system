@@ -18,7 +18,7 @@
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <p class="text-sm font-medium text-slate-500">Total Products</p>
+                    <p class="text-sm font-medium text-slate-500">Active Products</p>
                     <p class="mt-3 text-3xl font-bold tracking-tight text-slate-950">{{ $totalProducts }}</p>
                 </div>
                 <div class="rounded-xl bg-sky-50 p-3 text-sky-600">
