@@ -12,6 +12,7 @@ class DashboardController extends Controller
         $categories = Category::all();
 
         $totalProducts = Product::where('is_active', true)->count();
+        $archivedProducts = Product::where('is_active', false)->count();
         $totalCategories = Category::count();
         $totalQuantity = Product::sum('quantity');
 
@@ -33,6 +34,7 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'totalProducts',
+            'archivedProducts',
             'totalCategories',
             'totalQuantity',
             'inventoryValue',
