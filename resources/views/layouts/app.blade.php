@@ -4,6 +4,7 @@
         request()->routeIs('products.*') => 'Products',
         request()->routeIs('categories.*') => 'Categories',
         request()->routeIs('stock-transactions.*') => 'Stock History',
+        request()->routeIs('activity-logs.*') => 'Activity Log',
         default => 'Inventory',
     };
 @endphp
@@ -92,6 +93,24 @@
                     @if ($unreadStockTransactionCount > 0)
                         <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-rose-600 px-2 py-1 text-xs font-bold leading-none text-white ring-2 ring-white" aria-label="{{ $unreadStockTransactionCount }} unread transactions">
                             {{ $unreadStockTransactionCount > 99 ? '99+' : $unreadStockTransactionCount }}
+                        </span>
+                    @endif
+                </a>
+
+                <a href="{{ route('activity-logs.index') }}" @class([
+                    'group flex w-full items-center justify-between gap-5 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
+                    'bg-sky-600 text-white shadow-sm shadow-sky-600/20' => request()->routeIs('activity-logs.*'),
+                    'text-slate-600 hover:bg-slate-100 hover:text-slate-950' => ! request()->routeIs('activity-logs.*'),
+                ]) @if (request()->routeIs('activity-logs.*')) aria-current="page" @endif>
+                    <span class="flex items-center gap-3">
+                        <svg aria-hidden="true" class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6.75A2.75 2.75 0 0 1 6.75 4h10.5A2.75 2.75 0 0 1 20 6.75v10.5A2.75 2.75 0 0 1 17.25 20H6.75A2.75 2.75 0 0 1 4 17.25V6.75ZM8 8h8m-8 4h8m-8 4h4" />
+                        </svg>
+                        Activity Log
+                    </span>
+                    @if ($unreadActivityLogCount > 0)
+                        <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-rose-600 px-2 py-1 text-xs font-bold leading-none text-white ring-2 ring-white" aria-label="{{ $unreadActivityLogCount }} unread activity records">
+                            {{ $unreadActivityLogCount > 99 ? '99+' : $unreadActivityLogCount }}
                         </span>
                     @endif
                 </a>

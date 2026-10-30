@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -10,11 +11,38 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::paginate(10);
+        $search = $request->input('search');
+        $sortOptions = [
+            'newest' => ['created_at', 'desc'],
+            'oldest' => ['created_at', 'asc'],
+            'name_asc' => ['name', 'asc'],
+            'name_desc' => ['name', 'desc'],
+        ];
+        $sort = $request->input('sort', 'newest');
 
-        return view('categories.index', compact('categories'));
+        if (! is_string($search)) {
+            $search = null;
+        }
+
+        if (! is_string($sort) || ! array_key_exists($sort, $sortOptions)) {
+            $sort = 'newest';
+        }
+
+        $categories = Category::query()
+            ->when($search, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy($sortOptions[$sort][0], $sortOptions[$sort][1])
+            ->orderBy('id', $sortOptions[$sort][1])
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('categories.index', compact('categories', 'search', 'sort'));
     }
 
     /**
@@ -33,13 +61,21 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => [
                 'required',
+                'string',
+                'max:255',
                 'unique:categories,name',
-                'regex:/^[A-Za-z0-9 ]+$/',
+                "regex:/^[\pL\pN][\pL\pN\s&'’().-]*$/u",
             ],
             'description' => ['nullable', 'string'],
         ]);
 
-        Category::create($validated);
+        $category = Category::create($validated);
+
+        ActivityLogger::log(
+            'created',
+            "Category: {$category->name} was created.",
+            'Category'
+        );
 
         return redirect()->route('categories.index')->with('success', 'Category added successfully!');
     }
@@ -78,8 +114,10 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => [
                 'required',
+                'string',
+                'max:255',
                 'unique:categories,name,'.$category->id,
-                'regex:/^[A-Za-z0-9 ]+$/',
+                "regex:/^[\pL\pN][\pL\pN\s&'’().-]*$/u",
             ],
             'description' => ['nullable', 'string'],
 
@@ -94,6 +132,12 @@ class CategoryController extends Controller
         }
 
         $category->save();
+
+        ActivityLogger::log(
+            'updated',
+            "Category: {$category->name} was updated.",
+            'Category'
+        );
 
         return redirect()
             ->route($returnToDetails ? 'categories.show' : 'categories.index', $returnToDetails ? $category->id : [])

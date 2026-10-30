@@ -13,6 +13,35 @@
     </button>
 </div>
 
+<section class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="category-filters-heading">
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
+        <div>
+            <h2 id="category-filters-heading" class="text-base font-semibold text-slate-900">Find categories</h2>
+            <p class="mt-1 text-sm text-slate-500">Search by category name or description, or sort the list.</p>
+        </div>
+        <span id="category-result-count" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{{ $categories->total() }} {{ \Illuminate\Support\Str::plural('category', $categories->total()) }}</span>
+    </div>
+
+    <form id="category-filters-form" action="{{ route('categories.index') }}" method="GET" class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,0.4fr)_auto] sm:items-end">
+        <div>
+            <label for="category-search" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Search</label>
+            <input id="category-search" type="search" name="search" value="{{ $search }}" placeholder="Category name or description" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+        </div>
+        <div>
+            <label for="category-sort" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Sort by</label>
+            <select name="sort" id="category-sort" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                <option value="newest" @selected($sort === 'newest')>Newest first</option>
+                <option value="oldest" @selected($sort === 'oldest')>Oldest first</option>
+                <option value="name_asc" @selected($sort === 'name_asc')>Name: A-Z</option>
+                <option value="name_desc" @selected($sort === 'name_desc')>Name: Z-A</option>
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ route('categories.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">Clear</a>
+        </div>
+    </form>
+</section>
+
 <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
     <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
         <div>
@@ -31,7 +60,7 @@
                 <th scope="col" class="w-28 px-4 py-3.5 font-semibold">Actions</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
+        <tbody id="category-results-body" class="divide-y divide-slate-100">
             @forelse ($categories as $category)
                 <tr class="transition-colors hover:bg-sky-50/60">
                     <td class="whitespace-nowrap px-4 py-3.5 text-xs font-semibold text-slate-400">#{{ $category->id }}</td>
@@ -84,27 +113,7 @@
     </div>
 </div>
 
-@if ($categories->hasPages())
-    <div class="mt-6">{{ $categories->links() }}</div>
-@endif
-
-{{-- Delete Category Modal (temporarily disabled)
-<div id="deleteCategoryModal" data-modal class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4">
-    <div class="w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20">
-        <div class="p-5">
-            <div class="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-lg font-bold text-rose-600">!</div>
-            <h2 class="text-lg font-semibold text-slate-900">Delete category?</h2>
-            <p class="mt-2 text-sm leading-6 text-slate-600">Are you sure you want to delete <span data-modal-field="deleteName" class="font-semibold text-slate-900"></span>? This action cannot be undone.</p>
-        </div>
-        --}}
-        <form action="{{ route('categories.destroy', 0) }}" method="POST" class="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4">
-            @csrf
-            @method('DELETE')
-            <button type="button" data-modal-close class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
-            <button type="submit" class="rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700">Delete</button>
-        </form>
-    </div>
-</div>
+<div id="category-pagination" class="mt-6 {{ $categories->hasPages() ? '' : 'hidden' }}">{{ $categories->links() }}</div>
 
 <div id="addCategoryModal" data-modal class="fixed inset-0 z-50 {{ $errors->any() && old('form_type') !== 'edit_category' ? 'flex' : 'hidden' }} items-center justify-center bg-slate-950/60 p-4">
     <div class="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20">

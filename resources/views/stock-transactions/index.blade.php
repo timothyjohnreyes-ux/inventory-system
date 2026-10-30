@@ -15,6 +15,34 @@
     </div>
 </div>
 
+<section class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="stock-filters-heading">
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
+        <div>
+            <h2 id="stock-filters-heading" class="text-base font-semibold text-slate-900">Find transactions</h2>
+            <p class="mt-1 text-sm text-slate-500">Search by product, SKU, or remarks, then filter by movement type.</p>
+        </div>
+        <span id="stock-result-count" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{{ $transactions->total() }} {{ \Illuminate\Support\Str::plural('result', $transactions->total()) }}</span>
+    </div>
+
+    <form id="stock-filters-form" action="{{ route('stock-transactions.index') }}" method="GET" class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,0.4fr)_auto] sm:items-end">
+        <div>
+            <label for="stock-search" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Search</label>
+            <input id="stock-search" type="search" name="search" value="{{ $search }}" placeholder="Product, SKU, or remarks" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+        </div>
+        <div>
+            <label for="stock-type" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Movement</label>
+            <select name="type" id="stock-type" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                <option value="">All movements</option>
+                <option value="in" @selected($type === 'in')>Stock in</option>
+                <option value="out" @selected($type === 'out')>Stock out</option>
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ route('stock-transactions.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">Clear</a>
+        </div>
+    </form>
+</section>
+
 <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" aria-labelledby="stock-history-heading">
     <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div>
@@ -49,7 +77,7 @@
                     <th scope="col" class="px-1 py-2 font-semibold sm:px-2 sm:py-3.5">Created at</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 bg-white">
+            <tbody id="stock-results-body" class="divide-y divide-slate-100 bg-white">
                 @forelse ($transactions as $transaction)
                     <tr class="transition-colors hover:bg-sky-50/50">
                         <td class="overflow-hidden px-1 py-2 sm:px-2 sm:py-3.5">
@@ -111,7 +139,5 @@
     </div>
 </section>
 
-@if ($transactions->hasPages())
-    <div class="mt-6">{{ $transactions->links() }}</div>
-@endif
+<div id="stock-pagination" class="mt-6 {{ $transactions->hasPages() ? '' : 'hidden' }}">{{ $transactions->links() }}</div>
 @endsection

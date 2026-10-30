@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\StockTransaction;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -106,7 +107,7 @@ class ProductController extends Controller
         // Add the generated SKU to the validated data
         $validated['sku'] = $sku;
 
-        DB::transaction(function () use ($validated) {
+        $product = DB::transaction(function () use ($validated) {
             $product = Product::create($validated);
 
             if ($product->quantity > 0) {
@@ -117,7 +118,15 @@ class ProductController extends Controller
                     'remarks' => 'Initial stock',
                 ]);
             }
+
+            return $product;
         });
+
+        ActivityLogger::log(
+            'created',
+            "Product: {$product->name} (SKU: {$product->sku}) was created.",
+            'Product'
+        );
 
         return redirect()->route('products.index')->with('success', 'Product added successfully!');
     }
@@ -169,11 +178,16 @@ class ProductController extends Controller
 
         $product->save();
 
+        ActivityLogger::log(
+            'updated',
+            "Product: {$product->name} (SKU: {$product->sku}) was updated.",
+            'Product'
+        );
+
         return redirect()
             ->route($returnToDetails ? 'products.show' : 'products.index', $returnToDetails ? $product->id : [])
             ->with('success', 'Product updated successfully!');
     }
-
 
     public function toggleStatus(string $id)
     {
@@ -183,6 +197,12 @@ class ProductController extends Controller
         $product->save();
 
         $status = $product->is_active ? 'activated' : 'deactivated';
+
+        ActivityLogger::log(
+            $status,
+            "Product: {$product->name} (SKU: {$product->sku}) was {$status}.",
+            'Product'
+        );
 
         return redirect()
             ->route('products.index')

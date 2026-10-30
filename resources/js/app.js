@@ -135,6 +135,195 @@ if (productFiltersForm) {
     });
 }
 
+const categoryFiltersForm = document.getElementById('category-filters-form');
+
+if (categoryFiltersForm) {
+    const searchInput = categoryFiltersForm.querySelector('[name="search"]');
+    const sortSelect = categoryFiltersForm.querySelector('[name="sort"]');
+    let searchTimeout;
+    let activeRequest;
+
+    const updateCategories = async (url) => {
+        activeRequest?.abort();
+        activeRequest = new AbortController();
+        document.getElementById('category-results-body')?.setAttribute('aria-busy', 'true');
+
+        try {
+            const response = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: activeRequest.signal,
+            });
+
+            if (!response.ok) {
+                throw new Error('Unable to refresh categories.');
+            }
+
+            const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+
+            ['category-results-body', 'category-pagination', 'category-result-count'].forEach((id) => {
+                const currentElement = document.getElementById(id);
+                const updatedElement = page.getElementById(id);
+
+                if (currentElement && updatedElement) {
+                    currentElement.innerHTML = updatedElement.innerHTML;
+                    currentElement.classList.toggle('hidden', updatedElement.classList.contains('hidden'));
+                }
+            });
+
+            window.history.replaceState({}, '', url);
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                window.location.assign(url);
+            }
+        } finally {
+            document.getElementById('category-results-body')?.removeAttribute('aria-busy');
+        }
+    };
+
+    const submitCategoryFilters = () => {
+        window.clearTimeout(searchTimeout);
+        const url = new URL(categoryFiltersForm.action, window.location.origin);
+        new FormData(categoryFiltersForm).forEach((value, key) => {
+            if (value && !(key === 'sort' && value === 'newest')) {
+                url.searchParams.set(key, value);
+            } else {
+                url.searchParams.delete(key);
+            }
+        });
+
+        updateCategories(url);
+    };
+
+    searchInput?.addEventListener('input', () => {
+        window.clearTimeout(searchTimeout);
+        searchTimeout = window.setTimeout(submitCategoryFilters, 300);
+    });
+
+    categoryFiltersForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        submitCategoryFilters();
+    });
+
+    sortSelect?.addEventListener('change', submitCategoryFilters);
+
+    window.addEventListener('popstate', () => {
+        const url = new URL(window.location.href);
+        searchInput.value = url.searchParams.get('search') ?? '';
+        sortSelect.value = url.searchParams.get('sort') ?? 'newest';
+        updateCategories(url);
+    });
+}
+
+const setupLiveFilters = ({ formId, searchName, resultBodyId, paginationId, resultCountId, selectNames = [] }) => {
+    const form = document.getElementById(formId);
+
+    if (!form) {
+        return;
+    }
+
+    const searchInput = form.querySelector(`[name="${searchName}"]`);
+    const selects = selectNames
+        .map((name) => form.querySelector(`[name="${name}"]`))
+        .filter(Boolean);
+    let searchTimeout;
+    let activeRequest;
+
+    const updateResults = async (url) => {
+        activeRequest?.abort();
+        activeRequest = new AbortController();
+        document.getElementById(resultBodyId)?.setAttribute('aria-busy', 'true');
+
+        try {
+            const response = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: activeRequest.signal,
+            });
+
+            if (!response.ok) {
+                throw new Error('Unable to refresh filtered results.');
+            }
+
+            const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+
+            [resultBodyId, paginationId, resultCountId].forEach((id) => {
+                const currentElement = document.getElementById(id);
+                const updatedElement = page.getElementById(id);
+
+                if (currentElement && updatedElement) {
+                    currentElement.innerHTML = updatedElement.innerHTML;
+                    currentElement.classList.toggle('hidden', updatedElement.classList.contains('hidden'));
+                }
+            });
+
+            window.history.replaceState({}, '', url);
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                window.location.assign(url);
+            }
+        } finally {
+            document.getElementById(resultBodyId)?.removeAttribute('aria-busy');
+        }
+    };
+
+    const submitFilters = () => {
+        window.clearTimeout(searchTimeout);
+        const url = new URL(form.action, window.location.origin);
+
+        new FormData(form).forEach((value, key) => {
+            if (value) {
+                url.searchParams.set(key, value);
+            } else {
+                url.searchParams.delete(key);
+            }
+        });
+
+        updateResults(url);
+    };
+
+    searchInput?.addEventListener('input', () => {
+        window.clearTimeout(searchTimeout);
+        searchTimeout = window.setTimeout(submitFilters, 300);
+    });
+
+    selects.forEach((select) => select.addEventListener('change', submitFilters));
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        submitFilters();
+    });
+
+    window.addEventListener('popstate', () => {
+        const url = new URL(window.location.href);
+
+        if (searchInput) {
+            searchInput.value = url.searchParams.get(searchName) ?? '';
+        }
+
+        selects.forEach((select) => {
+            select.value = url.searchParams.get(select.name) ?? '';
+        });
+
+        updateResults(url);
+    });
+};
+
+setupLiveFilters({
+    formId: 'stock-filters-form',
+    searchName: 'search',
+    resultBodyId: 'stock-results-body',
+    paginationId: 'stock-pagination',
+    resultCountId: 'stock-result-count',
+    selectNames: ['type'],
+});
+
+setupLiveFilters({
+    formId: 'activity-filters-form',
+    searchName: 'search',
+    resultBodyId: 'activity-results-body',
+    paginationId: 'activity-pagination',
+    resultCountId: 'activity-result-count',
+    selectNames: ['module'],
+});
+
 const closeModal = (modal) => {
     modal.classList.add('hidden');
     modal.classList.remove('flex');

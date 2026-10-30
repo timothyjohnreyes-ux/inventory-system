@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
@@ -23,3 +24,6 @@ Route::post('/stock-transactions', [StockTransactionController::class, 'store'])
 
 Route::get('/stock-transactions', [StockTransactionController::class, 'index'])
     ->name('stock-transactions.index');
+
+Route::get('/activity-logs', [ActivityLogController::class, 'index'])
+    ->name('activity-logs.index');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\StockTransaction;
+use App\Services\ActivityLogger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,15 +24,8 @@ class StockTransactionController extends Controller
             'remarks' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        if (! $request->session()->has(StockTransaction::LAST_VIEWED_SESSION_KEY)) {
-            $request->session()->put(
-                StockTransaction::LAST_VIEWED_SESSION_KEY,
-                StockTransaction::max('id') ?? 0
-            );
-        }
-
         // Step 2: Process the stock movement safely
-        DB::transaction(function () use ($validated) {
+        $product = DB::transaction(function () use ($validated) {
             $product = Product::whereKey($validated['product_id'])
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -65,7 +59,23 @@ class StockTransactionController extends Controller
                 'quantity' => $quantity,
                 'remarks' => $validated['remarks'] ?? null,
             ]);
+
+            return $product;
         });
+
+        $action = $validated['type'] === 'in' ? 'stock_in' : 'stock_out';
+
+        $label = $validated['type'] === 'in' ? 'Stock In' : 'Stock Out';
+
+        $remarks = ! empty($validated['remarks'])
+            ? " Remarks: {$validated['remarks']}"
+            : '';
+
+        ActivityLogger::log(
+            $action,
+            "{$label}: {$validated['quantity']} units of product {$product->name} (SKU: {$product->sku}).{$remarks}",
+            'Stock'
+        );
 
         // Step 5: Return a success message
         return redirect()
@@ -82,10 +92,39 @@ class StockTransactionController extends Controller
             StockTransaction::max('id') ?? 0
         );
 
-        $transactions = StockTransaction::with('product')
-            ->latest()
-            ->paginate(10);
+        $search = $request->input('search');
+        $type = $request->input('type');
 
-        return view('stock-transactions.index', compact('transactions'));
+        if (! is_string($search)) {
+            $search = null;
+        }
+
+        if (! in_array($type, ['in', 'out'], true)) {
+            $type = null;
+        }
+
+        $transactions = StockTransaction::query()
+            ->with('product')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('remarks', 'like', "%{$search}%")
+                        ->orWhereHas('product', function ($query) use ($search) {
+                            $query->where('name', 'like', "%{$search}%")
+                                ->orWhere('sku', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($type, function ($query, $type) {
+                $query->where('type', $type);
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('stock-transactions.index', compact(
+            'transactions',
+            'search',
+            'type'
+        ));
     }
 }
