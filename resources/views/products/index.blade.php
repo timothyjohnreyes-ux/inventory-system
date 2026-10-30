@@ -46,7 +46,7 @@
         </span>
     </div>
 
-    <form id="product-filters-form" action="{{ route('products.index') }}" method="GET" class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,0.55fr)_minmax(12rem,0.55fr)_auto] sm:items-end">
+    <form id="product-filters-form" action="{{ route('products.index') }}" method="GET" class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,0.55fr)_minmax(12rem,0.55fr)_minmax(12rem,0.55fr)_auto] sm:items-end">
         <input type="hidden" name="status" value="{{ $status }}">
         <div>
             <label for="product-search" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Search</label>
@@ -101,6 +101,17 @@
             </select>
         </div>
 
+        <div>
+            <label for="stock-status" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Stock level</label>
+            <select
+                name="stock_status"
+                id="stock-status"
+                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                <option value="all" {{ $stockStatus === 'all' ? 'selected' : '' }}>All stock</option>
+                <option value="low_stock" {{ $stockStatus === 'low_stock' ? 'selected' : '' }}>Low stock</option>
+                <option value="out_of_stock" {{ $stockStatus === 'out_of_stock' ? 'selected' : '' }}>Out of stock</option>
+            </select>
+        </div>
 
         <div>
             <label for="product-category" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Category</label>
@@ -124,12 +135,22 @@
 </section>
 
 <div id="active-product-filters">
-    @if (filled($search) || filled($categoryId))
+    @if (filled($search) || filled($categoryId) || in_array($stockStatus, ['low_stock', 'out_of_stock'], true))
     <div class="mb-4 flex flex-wrap items-center gap-2" aria-label="Active filters">
         <span class="text-sm font-medium text-slate-500">Active filters:</span>
         @if (filled($search))
-        <a href="{{ route('products.index', array_filter(['category_id' => $categoryId, 'sort' => $sort, 'status' => $status])) }}" class="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-800 ring-1 ring-inset ring-sky-200 hover:bg-sky-100">
+        <a href="{{ route('products.index', array_filter(['category_id' => $categoryId, 'sort' => $sort, 'status' => $status, 'stock_status' => in_array($stockStatus, ['low_stock', 'out_of_stock'], true) ? $stockStatus : null])) }}" class="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-800 ring-1 ring-inset ring-sky-200 hover:bg-sky-100">
             Search: {{ $search }} <span aria-hidden="true" class="text-sky-600">&times;</span>
+        </a>
+        @endif
+        @if ($stockStatus === 'low_stock')
+        <a href="{{ route('products.index', array_filter(['search' => $search, 'category_id' => $categoryId, 'sort' => $sort, 'status' => $status])) }}" class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-800 ring-1 ring-inset ring-amber-200 hover:bg-amber-100">
+            Low stock <span aria-hidden="true" class="text-amber-600">&times;</span>
+        </a>
+        @endif
+        @if ($stockStatus === 'out_of_stock')
+        <a href="{{ route('products.index', array_filter(['search' => $search, 'category_id' => $categoryId, 'sort' => $sort, 'status' => $status])) }}" class="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-800 ring-1 ring-inset ring-rose-200 hover:bg-rose-100">
+            Out of stock <span aria-hidden="true" class="text-rose-600">&times;</span>
         </a>
         @endif
         @if (filled($categoryId))
@@ -154,6 +175,8 @@
                 <th scope="col" class="whitespace-nowrap px-4 py-3.5 font-semibold">SKU</th>
                 <th scope="col" class="whitespace-nowrap px-4 py-3.5 font-semibold">Quantity</th>
                 <th scope="col" class="whitespace-nowrap px-4 py-3.5 text-right font-semibold">Price</th>
+                <th scope="col" class="whitespace-nowrap px-4 py-3.5 font-semibold">Reorder Level</th>
+                <th scope="col" class="whitespace-nowrap px-4 py-3.5 font-semibold">Status</th>
                 <th scope="col" class="whitespace-nowrap px-4 py-3.5 font-semibold">Actions</th>
             </tr>
         </thead>
@@ -176,12 +199,22 @@
                         <span class="font-semibold text-slate-800">{{ number_format($product->quantity) }}</span>
                         @if ((int) $product->quantity === 0)
                         <span class="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700 ring-1 ring-inset ring-rose-200">Out</span>
-                        @elseif ($product->quantity <= 10)
+                        @elseif ($product->quantity <= $product->reorder_level)
                             <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-200">Low</span>
                             @endif
                     </div>
                 </td>
                 <td class="whitespace-nowrap px-4 py-3.5 text-right font-semibold text-slate-900">&#8369;{{ number_format((float) $product->price, 2) }}</td>
+                <td class="whitespace-nowrap px-4 py-3.5">
+                    <span class="font-semibold text-slate-800">{{ number_format($product->reorder_level) }}</span>
+                </td>
+                <td class="whitespace-nowrap px-4 py-3.5">
+                    @if ($product->is_active)
+                    <span class="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700 ring-1 ring-inset ring-green-200">Active</span>
+                    @else
+                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 ring-1 ring-inset ring-slate-200">Archived</span>
+                    @endif
+                </td>
                 <td class="whitespace-nowrap px-4 py-3.5">
                     <div class="flex items-center gap-1">
                         <a
@@ -210,7 +243,7 @@
                             </svg>
                         </button>
                         @endif
-                        @if ($product->is_active || $product->quantity > 0)
+                        @if ($product->quantity > 0)
                         <button
                             type="button"
                             data-modal-open="stockOutModal"
@@ -233,6 +266,17 @@
                                 </svg>
                             </button>
                             <div data-menu-content class="fixed z-50 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg shadow-slate-900/10">
+                                @if ($product->is_active)
+                                <button
+                                    type="button"
+                                    data-modal-open="stockAdjustmentModal"
+                                    data-product-id="{{ $product->id }}"
+                                    data-product-name="{{ $product->name }}"
+                                    data-current-stock="{{ $product->quantity }}"
+                                    class="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50">
+                                    Adjust stock
+                                </button>
+                                @endif
                                 <button
                                     type="button"
                                     data-modal-open="editProductModal"
@@ -242,6 +286,7 @@
                                     data-sku="{{ $product->sku }}"
                                     data-category-id="{{ $product->category_id }}"
                                     data-quantity="{{ $product->quantity }}"
+                                    data-reorder-level="{{ $product->reorder_level }}"
                                     data-price="{{ $product->price }}"
                                     data-description="{{ $product->description }}"
                                     class="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50">
@@ -262,7 +307,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="6" class="px-6 py-14 text-center">
+                <td colspan="8" class="px-6 py-14 text-center">
                     <p class="text-base font-semibold text-slate-900">No products found</p>
                     <p class="mt-1 text-sm text-slate-500">Try a different search or category.</p>
                     <a href="{{ route('products.index') }}" class="mt-4 inline-flex rounded-lg px-3 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-50">Clear filters</a>
@@ -392,6 +437,115 @@
     </div>
 </div>
 
+{{-- Stock Adjustment Modal --}}
+<div
+    id="stockAdjustmentModal"
+    data-modal
+    class="fixed inset-0 z-50 items-center justify-center bg-slate-950/60 p-4 {{ $errors->any() && old('form_type') === 'stock_adjustment' ? 'flex' : 'hidden' }}">
+
+    <div class="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20">
+
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">Stock Adjustment</h2>
+                <p class="mt-1 text-sm text-slate-500">Set the actual quantity after a physical count or stock discrepancy.</p>
+            </div>
+            <button type="button" data-modal-close class="rounded-xl p-2 text-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500" aria-label="Close stock adjustment dialog">&times;</button>
+        </div>
+
+        <form action="{{ route('stock-adjustments.store') }}" method="POST" class="max-h-[80vh] space-y-5 overflow-y-auto p-6">
+            @csrf
+
+            <input type="hidden" name="form_type" value="stock_adjustment">
+
+            {{-- Product ID --}}
+            <input
+                type="hidden"
+                name="product_id"
+                id="adjustment_product_id"
+                data-modal-field="productId"
+                value="{{ old('form_type') === 'stock_adjustment' ? old('product_id') : '' }}">
+
+            <div>
+                <label for="adjustment_product_name" class="mb-2 block text-sm font-semibold text-slate-700">Product</label>
+                <input
+                    type="text"
+                    id="adjustment_product_name"
+                    name="product_name"
+                    readonly
+                    data-modal-field="productName"
+                    value="{{ old('form_type') === 'stock_adjustment' ? old('product_name') : '' }}"
+                    class="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+            </div>
+
+            <div>
+                <label for="adjustment_current_stock" class="mb-2 block text-sm font-semibold text-slate-700">Current Stock</label>
+                <input
+                    type="number"
+                    id="adjustment_current_stock"
+                    name="current_stock"
+                    readonly
+                    data-modal-field="currentStock"
+                    value="{{ old('form_type') === 'stock_adjustment' ? old('current_stock') : '' }}"
+                    class="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+            </div>
+
+            <div>
+                <label for="adjustment_new_quantity" class="mb-2 block text-sm font-semibold text-slate-700">New Quantity <span class="text-rose-500">*</span></label>
+                <input
+                    id="adjustment_new_quantity"
+                    type="number"
+                    name="new_quantity"
+                    min="0"
+                    required
+                    value="{{ old('form_type') === 'stock_adjustment' ? old('new_quantity') : '' }}"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                @if (old('form_type') === 'stock_adjustment')
+                @error('new_quantity') <p class="mt-2 text-sm font-medium text-rose-600">{{ $message }}</p> @enderror
+                @endif
+            </div>
+
+            <div>
+                <label for="adjustment_reason" class="mb-2 block text-sm font-semibold text-slate-700">Reason <span class="text-rose-500">*</span></label>
+                <select id="adjustment_reason" name="reason" required class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    <option value="">Select Reason</option>
+                    @foreach (['Physical Count', 'Damaged', 'Expired', 'Missing', 'Other'] as $reason)
+                    <option value="{{ $reason }}" {{ old('reason') === $reason ? 'selected' : '' }}>{{ $reason }}</option>
+                    @endforeach
+                </select>
+                @if (old('form_type') === 'stock_adjustment')
+                @error('reason') <p class="mt-2 text-sm font-medium text-rose-600">{{ $message }}</p> @enderror
+                @endif
+            </div>
+
+            <div>
+                <label for="adjustment_remarks" class="mb-2 block text-sm font-semibold text-slate-700">Remarks <span class="font-normal text-slate-400">(optional)</span></label>
+                <textarea
+                    id="adjustment_remarks"
+                    name="remarks"
+                    maxlength="1000"
+                    rows="3"
+                    placeholder="Add a note about this adjustment"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">{{ old('form_type') === 'stock_adjustment' ? old('remarks') : '' }}</textarea>
+                @if (old('form_type') === 'stock_adjustment')
+                @error('remarks') <p class="mt-2 text-sm font-medium text-rose-600">{{ $message }}</p> @enderror
+                @endif
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-slate-200 pt-5">
+                <button type="button" data-modal-close class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                    Cancel
+                </button>
+
+                <button type="submit" class="rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
+                    Save Adjustment
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
 {{-- Add Product Modal --}}
 <div
     id="addProductModal"
@@ -503,6 +657,30 @@
                             value="{{ old('quantity') }}">
 
                         @error('quantity')
+                        <p class="mt-2 text-sm font-medium text-rose-600">
+                            {{ $message }}
+                        </p>
+                        @enderror
+                    </div>
+
+                    {{-- Reorder Level --}}
+                    <div>
+                        <label
+                            class="mb-2 block text-sm font-semibold text-slate-700"
+                            for="modal_reorder_level">
+                            Reorder Level <span class="text-rose-500">*</span>
+                        </label>
+
+                        <input
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                            type="number"
+                            name="reorder_level"
+                            id="modal_reorder_level"
+                            min="0"
+                            value="{{ old('reorder_level', 10) }}"
+                            required>
+
+                        @error('reorder_level')
                         <p class="mt-2 text-sm font-medium text-rose-600">
                             {{ $message }}
                         </p>
@@ -652,6 +830,13 @@
                         </span>
                     </div>
 
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-700" for="edit_product_reorder_level">Reorder Level <span class="text-rose-500">*</span></label>
+                    <input data-modal-field="reorderLevel" id="edit_product_reorder_level" name="reorder_level" type="number" min="0" value="{{ old('reorder_level') }}" required class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    @if(old('form_type') === 'edit_product')
+                    @error('reorder_level') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+                    @endif
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700" for="edit_product_price">Price (&#8369;)</label>

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\ActivityLog;
+use App\Models\StockAdjustment;
 use App\Models\StockTransaction;
 use Illuminate\Support\Facades\View as ViewFacade;
 use Illuminate\Support\ServiceProvider;
@@ -34,9 +35,14 @@ class AppServiceProvider extends ServiceProvider
                 ->where('id', '>', $session->get(ActivityLog::LAST_VIEWED_SESSION_KEY))
                 ->count();
 
+            $unreadStockAdjustmentCount = StockAdjustment::query()
+                ->where('id', '>', $session->get(StockAdjustment::LAST_VIEWED_SESSION_KEY))
+                ->count();
+
             $view->with([
                 'unreadStockTransactionCount' => $unreadStockTransactionCount,
                 'unreadActivityLogCount' => $unreadActivityLogCount,
+                'unreadStockAdjustmentCount' => $unreadStockAdjustmentCount,
             ]);
         });
     }

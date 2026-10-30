@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\ActivityLog;
+use App\Models\StockAdjustment;
 use App\Models\StockTransaction;
 use Closure;
 use Illuminate\Http\Request;
@@ -25,6 +26,13 @@ class InitializeUnreadHistoryCursors
             $session->put(
                 ActivityLog::LAST_VIEWED_SESSION_KEY,
                 ActivityLog::max('id') ?? 0
+            );
+        }
+
+        if (! $session->has(StockAdjustment::LAST_VIEWED_SESSION_KEY)) {
+            $session->put(
+                StockAdjustment::LAST_VIEWED_SESSION_KEY,
+                StockAdjustment::max('id') ?? 0
             );
         }
 

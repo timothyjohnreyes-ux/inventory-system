@@ -19,6 +19,12 @@ class ProductController extends Controller
         $search = $request->input('search');
         $categoryId = $request->input('category_id');
 
+        $stockStatus = $request->input('stock_status', 'all');
+
+        if (! in_array($stockStatus, ['all', 'low_stock', 'out_of_stock'], true)) {
+            $stockStatus = 'all';
+        }
+
         $status = $request->input('status', 'active');
 
         if (! in_array($status, ['active', 'archived'], true)) {
@@ -56,6 +62,11 @@ class ProductController extends Controller
             })
             ->when($categoryId, function ($query, $categoryId) {
                 $query->where('category_id', $categoryId);
+            })->when($stockStatus === 'low_stock', function ($query) {
+                $query->where('quantity', '>', 0)
+                    ->whereColumn('quantity', '<=', 'reorder_level');
+            })->when($stockStatus === 'out_of_stock', function ($query) {
+                $query->where('quantity', 0);
             })
             ->orderBy(
                 $sortOptions[$sort][0],
@@ -73,7 +84,8 @@ class ProductController extends Controller
             'search',
             'categoryId',
             'status',
-            'sort'
+            'sort',
+            'stockStatus'
         ));
     }
 
@@ -96,6 +108,7 @@ class ProductController extends Controller
             'name' => 'required',
             'category_id' => 'required|exists:categories,id',
             'quantity' => 'required|integer|min:0',
+            'reorder_level' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0|max:99999999.99|decimal:0,2',
             'description' => 'nullable|string',
         ]);
@@ -164,6 +177,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required',
             'category_id' => 'required|exists:categories,id',
+            'reorder_level' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0|max:99999999.99|decimal:0,2',
             'description' => 'nullable|string',
         ]);

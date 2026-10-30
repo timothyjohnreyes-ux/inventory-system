@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\StockTransactionController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,3 +28,9 @@ Route::get('/stock-transactions', [StockTransactionController::class, 'index'])
 
 Route::get('/activity-logs', [ActivityLogController::class, 'index'])
     ->name('activity-logs.index');
+
+Route::post('/stock-adjustments', [StockAdjustmentController::class, 'store'])
+    ->name('stock-adjustments.store');
+
+Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
+    ->name('stock-adjustments.index');

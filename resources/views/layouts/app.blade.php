@@ -4,6 +4,7 @@
         request()->routeIs('products.*') => 'Products',
         request()->routeIs('categories.*') => 'Categories',
         request()->routeIs('stock-transactions.*') => 'Stock History',
+        request()->routeIs('stock-adjustments.*') => 'Stock Adjustments',
         request()->routeIs('activity-logs.*') => 'Activity Log',
         default => 'Inventory',
     };
@@ -45,7 +46,7 @@
                 </button>
             </div>
 
-            <nav id="main-navigation" class="pointer-events-none absolute inset-x-0 top-full z-50 flex max-h-[80vh] -translate-y-2 flex-col gap-1 overflow-y-auto border-t border-slate-100 bg-white px-4 py-4 opacity-0 shadow-xl transition-[opacity,transform] duration-200 ease-out lg:pointer-events-auto lg:static lg:z-auto lg:max-h-none lg:flex-1 lg:translate-y-0 lg:space-y-1.5 lg:overflow-y-auto lg:border-t-0 lg:px-4 lg:py-5 lg:opacity-100 lg:shadow-none" aria-label="Main navigation" aria-hidden="true" inert>
+            <nav id="main-navigation" class="pointer-events-none absolute inset-x-0 top-full z-50 flex max-h-[80vh] -translate-y-2 flex-col gap-1 overflow-y-auto border-t border-slate-100 bg-white px-4 py-4 opacity-0 shadow-xl transition-[opacity,transform] duration-200 ease-out lg:pointer-events-auto lg:static lg:z-auto lg:max-h-none lg:flex-1 lg:translate-y-0 lg:space-y-1.5 lg:overflow-y-auto lg:border-t-0 lg:px-4 lg:py-5 lg:opacity-100 lg:shadow-none" aria-label="Main navigation">
                 <a href="{{ route('dashboard') }}" @class([
                     'group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
                     'bg-sky-600 text-white shadow-sm shadow-sky-600/20' => request()->routeIs('dashboard'),
@@ -93,6 +94,24 @@
                     @if ($unreadStockTransactionCount > 0)
                         <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-rose-600 px-2 py-1 text-xs font-bold leading-none text-white ring-2 ring-white" aria-label="{{ $unreadStockTransactionCount }} unread transactions">
                             {{ $unreadStockTransactionCount > 99 ? '99+' : $unreadStockTransactionCount }}
+                        </span>
+                    @endif
+                </a>
+
+                <a href="{{ route('stock-adjustments.index') }}" @class([
+                    'group flex w-full items-center justify-between gap-5 rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2',
+                    'bg-sky-600 text-white shadow-sm shadow-sky-600/20' => request()->routeIs('stock-adjustments.*'),
+                    'text-slate-600 hover:bg-slate-100 hover:text-slate-950' => ! request()->routeIs('stock-adjustments.*'),
+                ]) @if (request()->routeIs('stock-adjustments.*')) aria-current="page" @endif>
+                    <span class="flex items-center gap-3">
+                        <svg aria-hidden="true" class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 5v14m-7-7h14" />
+                        </svg>
+                        Stock Adjustments
+                    </span>
+                    @if ($unreadStockAdjustmentCount > 0)
+                        <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-rose-600 px-2 py-1 text-xs font-bold leading-none text-white ring-2 ring-white" aria-label="{{ $unreadStockAdjustmentCount }} unread stock adjustments">
+                            {{ $unreadStockAdjustmentCount > 99 ? '99+' : $unreadStockAdjustmentCount }}
                         </span>
                     @endif
                 </a>

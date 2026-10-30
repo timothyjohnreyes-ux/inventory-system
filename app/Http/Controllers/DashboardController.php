@@ -19,7 +19,8 @@ class DashboardController extends Controller
         $inventoryValue = Product::selectRaw('SUM(quantity * price) as total')->value('total') ?? 0;
 
         $lowStockProducts = Product::where('is_active', true)
-            ->where('quantity', '<=', 10)
+            ->where('quantity', '>', 0)
+            ->whereColumn('quantity', '<=', 'reorder_level')
             ->count();
 
         $outOfStockProducts = Product::where('is_active', true)

@@ -2,7 +2,6 @@ const productFiltersForm = document.getElementById('product-filters-form');
 const mobileNavigationToggle = document.querySelector('[data-mobile-nav-toggle]');
 const mobileNavigation = document.getElementById('main-navigation');
 const mobileNavigationMediaQuery = window.matchMedia('(min-width: 64rem)');
-let refreshProducts;
 
 const setMobileNavigationOpen = (isOpen) => {
     if (!mobileNavigationToggle || !mobileNavigation) {
@@ -45,6 +44,7 @@ if (productFiltersForm) {
     const searchInput = productFiltersForm.querySelector('[name="search"]');
     const categorySelect = productFiltersForm.querySelector('[name="category_id"]');
     const sortSelect = productFiltersForm.querySelector('[name="sort"]');
+    const stockStatusSelect = productFiltersForm.querySelector('[name="stock_status"]');
     const statusInput = productFiltersForm.querySelector('[name="status"]');
     let searchTimeout;
     let activeRequest;
@@ -84,8 +84,6 @@ if (productFiltersForm) {
             document.getElementById('product-results-body')?.removeAttribute('aria-busy');
         }
     };
-    refreshProducts = updateProducts;
-
     const submitFilters = () => {
         window.clearTimeout(searchTimeout);
         const url = new URL(productFiltersForm.action, window.location.origin);
@@ -103,6 +101,7 @@ if (productFiltersForm) {
     const syncFiltersFromUrl = (url) => {
         searchInput.value = url.searchParams.get('search') ?? '';
         categorySelect.value = url.searchParams.get('category_id') ?? '';
+        stockStatusSelect.value = url.searchParams.get('stock_status') ?? 'all';
         statusInput.value = url.searchParams.get('status') ?? 'active';
 
         const requestedSort = url.searchParams.get('sort') ?? 'newest';
@@ -125,6 +124,10 @@ if (productFiltersForm) {
     });
 
     sortSelect?.addEventListener('change', () => {
+        submitFilters();
+    });
+
+    stockStatusSelect?.addEventListener('change', () => {
         submitFilters();
     });
 
@@ -324,6 +327,15 @@ setupLiveFilters({
     selectNames: ['module'],
 });
 
+setupLiveFilters({
+    formId: 'stock-adjustment-filters-form',
+    searchName: 'search',
+    resultBodyId: 'stock-adjustment-results-body',
+    paginationId: 'stock-adjustment-pagination',
+    resultCountId: 'stock-adjustment-result-count',
+    selectNames: ['reason'],
+});
+
 const closeModal = (modal) => {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
@@ -418,6 +430,24 @@ document.addEventListener('click', (event) => {
             }
         }
 
+        if (modal.id === 'stockAdjustmentModal') {
+            const newQuantityField = modal.querySelector('[name="new_quantity"]');
+            const reasonField = modal.querySelector('[name="reason"]');
+            const adjustmentRemarksField = modal.querySelector('[name="remarks"]');
+
+            if (newQuantityField) {
+                newQuantityField.value = '';
+            }
+
+            if (reasonField) {
+                reasonField.value = '';
+            }
+
+            if (adjustmentRemarksField) {
+                adjustmentRemarksField.value = '';
+            }
+        }
+
         if (opener.dataset.formAction) {
             modal.querySelector('form').action = opener.dataset.formAction;
         }
@@ -436,18 +466,6 @@ document.addEventListener('click', (event) => {
         return;
     }
 
-    const filterLink = event.target.closest('#product-pagination a');
-
-    if (filterLink) {
-        event.preventDefault();
-        if (productFiltersForm) {
-            const destination = new URL(filterLink.href);
-            syncFiltersFromUrl(destination);
-        }
-        if (refreshProducts) {
-            refreshProducts(new URL(filterLink.href));
-        }
-    }
 });
 
 document.querySelectorAll('[data-modal-close]').forEach((closer) => {
