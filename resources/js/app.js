@@ -217,7 +217,7 @@ if (categoryFiltersForm) {
     });
 }
 
-const setupLiveFilters = ({ formId, searchName, resultBodyId, paginationId, resultCountId, selectNames = [] }) => {
+const setupLiveFilters = ({ formId, searchName, resultBodyId, paginationId, resultCountId, filterNames = [] }) => {
     const form = document.getElementById(formId);
 
     if (!form) {
@@ -225,11 +225,26 @@ const setupLiveFilters = ({ formId, searchName, resultBodyId, paginationId, resu
     }
 
     const searchInput = form.querySelector(`[name="${searchName}"]`);
-    const selects = selectNames
+    const filterControls = filterNames
         .map((name) => form.querySelector(`[name="${name}"]`))
         .filter(Boolean);
+    const startDateInput = form.querySelector('[name="start_date"]');
+    const endDateInput = form.querySelector('[name="end_date"]');
+    const maxAllowedDate = startDateInput?.max || endDateInput?.max || '';
     let searchTimeout;
     let activeRequest;
+
+    const updateDateConstraints = () => {
+        if (startDateInput && endDateInput) {
+            startDateInput.max = endDateInput.value && endDateInput.value < maxAllowedDate
+                ? endDateInput.value
+                : maxAllowedDate;
+            endDateInput.min = startDateInput.value || '';
+            endDateInput.max = maxAllowedDate;
+        }
+    };
+
+    updateDateConstraints();
 
     const updateResults = async (url) => {
         activeRequest?.abort();
@@ -270,6 +285,11 @@ const setupLiveFilters = ({ formId, searchName, resultBodyId, paginationId, resu
 
     const submitFilters = () => {
         window.clearTimeout(searchTimeout);
+
+        if (!form.reportValidity()) {
+            return;
+        }
+
         const url = new URL(form.action, window.location.origin);
 
         new FormData(form).forEach((value, key) => {
@@ -288,7 +308,12 @@ const setupLiveFilters = ({ formId, searchName, resultBodyId, paginationId, resu
         searchTimeout = window.setTimeout(submitFilters, 300);
     });
 
-    selects.forEach((select) => select.addEventListener('change', submitFilters));
+    filterControls.forEach((control) => {
+        control.addEventListener('change', () => {
+            updateDateConstraints();
+            submitFilters();
+        });
+    });
     form.addEventListener('submit', (event) => {
         event.preventDefault();
         submitFilters();
@@ -301,10 +326,11 @@ const setupLiveFilters = ({ formId, searchName, resultBodyId, paginationId, resu
             searchInput.value = url.searchParams.get(searchName) ?? '';
         }
 
-        selects.forEach((select) => {
-            select.value = url.searchParams.get(select.name) ?? '';
+        filterControls.forEach((control) => {
+            control.value = url.searchParams.get(control.name) ?? '';
         });
 
+        updateDateConstraints();
         updateResults(url);
     });
 };
@@ -315,7 +341,7 @@ setupLiveFilters({
     resultBodyId: 'stock-results-body',
     paginationId: 'stock-pagination',
     resultCountId: 'stock-result-count',
-    selectNames: ['type'],
+    filterNames: ['type', 'start_date', 'end_date'],
 });
 
 setupLiveFilters({
@@ -324,7 +350,7 @@ setupLiveFilters({
     resultBodyId: 'activity-results-body',
     paginationId: 'activity-pagination',
     resultCountId: 'activity-result-count',
-    selectNames: ['module'],
+    filterNames: ['module', 'start_date', 'end_date'],
 });
 
 setupLiveFilters({
@@ -333,7 +359,7 @@ setupLiveFilters({
     resultBodyId: 'stock-adjustment-results-body',
     paginationId: 'stock-adjustment-pagination',
     resultCountId: 'stock-adjustment-result-count',
-    selectNames: ['reason'],
+    filterNames: ['reason', 'start_date', 'end_date'],
 });
 
 const closeModal = (modal) => {

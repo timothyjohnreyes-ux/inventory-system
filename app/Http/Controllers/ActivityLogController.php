@@ -15,6 +15,19 @@ class ActivityLogController extends Controller
             ActivityLog::max('id') ?? 0
         );
 
+        $dateRules = [
+            'start_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'end_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+        ];
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $dateRules['end_date'][] = 'after_or_equal:start_date';
+        }
+
+        $dateFilters = $request->validate($dateRules);
+        $startDate = $dateFilters['start_date'] ?? '';
+        $endDate = $dateFilters['end_date'] ?? '';
+
         $query = ActivityLog::query()->latest();
 
         if ($request->filled('search')) {
@@ -32,6 +45,14 @@ class ActivityLogController extends Controller
             $query->where('module', $request->input('module'));
         }
 
+        if ($dateFilters['start_date'] ?? null) {
+            $query->whereDate('created_at', '>=', $dateFilters['start_date']);
+        }
+
+        if ($dateFilters['end_date'] ?? null) {
+            $query->whereDate('created_at', '<=', $dateFilters['end_date']);
+        }
+
         $activityLogs = $query
             ->paginate(10)
             ->withQueryString();
@@ -44,7 +65,9 @@ class ActivityLogController extends Controller
 
         return view('activity-logs.index', compact(
             'activityLogs',
-            'modules'
+            'modules',
+            'startDate',
+            'endDate'
         ));
     }
 }

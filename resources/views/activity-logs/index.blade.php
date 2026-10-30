@@ -19,12 +19,12 @@
     <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
         <div>
             <h2 id="activity-filters-heading" class="text-base font-semibold text-slate-900">Find activity</h2>
-            <p class="mt-1 text-sm text-slate-500">Search by action, description, user, or module.</p>
+            <p class="mt-1 text-sm text-slate-500">Search by action, description, or user, then filter by module and date range.</p>
         </div>
         <span id="activity-result-count" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{{ $activityLogs->total() }} {{ \Illuminate\Support\Str::plural('result', $activityLogs->total()) }}</span>
     </div>
 
-    <form id="activity-filters-form" action="{{ route('activity-logs.index') }}" method="GET" class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,0.4fr)_auto] sm:items-end">
+    <form id="activity-filters-form" action="{{ route('activity-logs.index') }}" method="GET" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(12rem,0.4fr)_minmax(10rem,0.35fr)_minmax(10rem,0.35fr)_auto] sm:items-end">
         <div>
             <label for="activity-search" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Search</label>
             <input id="activity-search" type="search" name="search" value="{{ request('search') }}" placeholder="Search activity..." class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
@@ -37,6 +37,14 @@
                     <option value="{{ $module }}" @selected(request('module') === $module)>{{ $module }}</option>
                 @endforeach
             </select>
+        </div>
+        <div>
+            <label for="activity-start-date" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Start date</label>
+            <input id="activity-start-date" type="date" name="start_date" value="{{ $startDate }}" max="{{ now()->toDateString() }}" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+        </div>
+        <div>
+            <label for="activity-end-date" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">End date</label>
+            <input id="activity-end-date" type="date" name="end_date" value="{{ $endDate }}" max="{{ now()->toDateString() }}" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
         </div>
         <div class="flex gap-2">
             <a href="{{ route('activity-logs.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">Clear</a>

@@ -23,6 +23,18 @@ class StockAdjustmentController extends Controller
         $search = $request->input('search');
         $reason = $request->input('reason');
         $reasons = ['Physical Count', 'Damaged', 'Expired', 'Missing', 'Other'];
+        $dateRules = [
+            'start_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'end_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+        ];
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $dateRules['end_date'][] = 'after_or_equal:start_date';
+        }
+
+        $dateFilters = $request->validate($dateRules);
+        $startDate = $dateFilters['start_date'] ?? '';
+        $endDate = $dateFilters['end_date'] ?? '';
 
         if (! is_string($search)) {
             $search = null;
@@ -46,6 +58,12 @@ class StockAdjustmentController extends Controller
             ->when($reason, function ($query, $reason) {
                 $query->where('reason', $reason);
             })
+            ->when($dateFilters['start_date'] ?? null, function ($query, $startDate) {
+                $query->whereDate('created_at', '>=', $startDate);
+            })
+            ->when($dateFilters['end_date'] ?? null, function ($query, $endDate) {
+                $query->whereDate('created_at', '<=', $endDate);
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -54,7 +72,9 @@ class StockAdjustmentController extends Controller
             'adjustments',
             'search',
             'reason',
-            'reasons'
+            'reasons',
+            'startDate',
+            'endDate'
         ));
     }
 

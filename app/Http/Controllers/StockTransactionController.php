@@ -94,6 +94,18 @@ class StockTransactionController extends Controller
 
         $search = $request->input('search');
         $type = $request->input('type');
+        $dateRules = [
+            'start_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'end_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+        ];
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $dateRules['end_date'][] = 'after_or_equal:start_date';
+        }
+
+        $dateFilters = $request->validate($dateRules);
+        $startDate = $dateFilters['start_date'] ?? '';
+        $endDate = $dateFilters['end_date'] ?? '';
 
         if (! is_string($search)) {
             $search = null;
@@ -117,6 +129,12 @@ class StockTransactionController extends Controller
             ->when($type, function ($query, $type) {
                 $query->where('type', $type);
             })
+            ->when($dateFilters['start_date'] ?? null, function ($query, $startDate) {
+                $query->whereDate('created_at', '>=', $startDate);
+            })
+            ->when($dateFilters['end_date'] ?? null, function ($query, $endDate) {
+                $query->whereDate('created_at', '<=', $endDate);
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -124,7 +142,9 @@ class StockTransactionController extends Controller
         return view('stock-transactions.index', compact(
             'transactions',
             'search',
-            'type'
+            'type',
+            'startDate',
+            'endDate'
         ));
     }
 }
