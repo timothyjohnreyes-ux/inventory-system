@@ -509,7 +509,7 @@
                 <label for="adjustment_reason" class="mb-2 block text-sm font-semibold text-slate-700">Reason <span class="text-rose-500">*</span></label>
                 <select id="adjustment_reason" name="reason" required class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
                     <option value="">Select Reason</option>
-                    @foreach (['Physical Count', 'Damaged', 'Expired', 'Missing', 'Other'] as $reason)
+                    @foreach (['Physical Count', 'Damaged', 'Expired', 'Other'] as $reason)
                     <option value="{{ $reason }}" {{ old('reason') === $reason ? 'selected' : '' }}>{{ $reason }}</option>
                     @endforeach
                 </select>
