@@ -11,7 +11,7 @@
         <h1 class="wrap-anywhere text-3xl font-bold tracking-tight text-slate-950">{{ $product->name }}</h1>
         <p class="mt-2 wrap-anywhere font-mono text-sm text-slate-500">{{ $product->sku }}</p>
     </div>
-    <button type="button" data-modal-open="editProductDetailModal" data-form-action="{{ route('products.update', $product->id) }}" data-name="{{ $product->name }}" data-category-id="{{ $product->category_id }}" data-quantity="{{ $product->quantity }}" data-price="{{ $product->price }}" data-description="{{ $product->description }}" class="inline-flex w-fit items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-sky-600/20 transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2">
+    <button type="button" data-modal-open="editProductDetailModal" data-form-action="{{ route('products.update', $product->id) }}" data-name="{{ $product->name }}" data-category-id="{{ $product->category_id }}" data-quantity="{{ $product->quantity }}" data-reorder-level="{{ $product->reorder_level }}" data-price="{{ $product->price }}" data-description="{{ $product->description }}" class="inline-flex w-fit items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-sky-600/20 transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2">
         <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m16.862 4.487 1.688-1.688a2.121 2.121 0 0 1 3 3l-9.193 9.193-4.125 1.125 1.125-4.125 7.505-7.505Z" /></svg>
         Edit product
     </button>
@@ -99,6 +99,13 @@
                     </div>
                     @if (old('form_type') === 'edit_product_detail')
                         @error('quantity') <p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p> @enderror
+                    @endif
+                </div>
+                <div>
+                    <label for="detail_product_reorder_level" class="mb-1.5 block text-sm font-semibold text-slate-700">Reorder level <span class="text-rose-500">*</span></label>
+                    <input id="detail_product_reorder_level" name="reorder_level" data-modal-field="reorderLevel" type="number" min="0" value="{{ old('reorder_level', $product->reorder_level) }}" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    @if (old('form_type') === 'edit_product_detail')
+                        @error('reorder_level') <p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p> @enderror
                     @endif
                 </div>
                 <div>

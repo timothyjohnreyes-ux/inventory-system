@@ -266,7 +266,7 @@
                     @enderror
                 </div>
 
-                {{-- Quantity and Price --}}
+                {{-- Quantity, Reorder Level, and Price --}}
                 <div class="grid gap-5 sm:grid-cols-2">
 
                     {{-- Quantity --}}
@@ -286,6 +286,30 @@
                             value="{{ old('quantity') }}">
 
                         @error('quantity')
+                        <p class="mt-2 text-sm font-medium text-rose-600">
+                            {{ $message }}
+                        </p>
+                        @enderror
+                    </div>
+
+                    {{-- Reorder Level --}}
+                    <div>
+                        <label
+                            class="mb-2 block text-sm font-semibold text-slate-700"
+                            for="modal_reorder_level">
+                            Reorder Level <span class="text-rose-500">*</span>
+                        </label>
+
+                        <input
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                            type="number"
+                            name="reorder_level"
+                            id="modal_reorder_level"
+                            min="0"
+                            value="{{ old('reorder_level', 10) }}"
+                            required>
+
+                        @error('reorder_level')
                         <p class="mt-2 text-sm font-medium text-rose-600">
                             {{ $message }}
                         </p>

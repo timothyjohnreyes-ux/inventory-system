@@ -54,6 +54,14 @@
         </div>
 
         <div>
+            <label class="mb-2 block text-sm font-semibold text-slate-700" for="reorder_level">Reorder level <span class="text-rose-500">*</span></label>
+            <input type="number" name="reorder_level" id="reorder_level" min="0" value="{{ old('reorder_level', $product->reorder_level) }}" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100" required>
+            @error('reorder_level')
+                <p class="mt-2 text-sm font-medium text-rose-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div>
             <label class="mb-2 block text-sm font-semibold text-slate-700" for="price">Unit price (&#8369;) <span class="text-rose-500">*</span></label>
             <input type="number" name="price" id="price" min="0" step="0.01" value="{{ old('price', $product->price) }}" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100" required>
             @error('price')
