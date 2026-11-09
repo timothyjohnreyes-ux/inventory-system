@@ -22,7 +22,7 @@ class StockAdjustmentController extends Controller
 
         $search = $request->input('search');
         $reason = $request->input('reason');
-        $reasons = ['Physical Count', 'Damaged', 'Expired', 'Missing', 'Other'];
+        $reasons = ['Physical Count', 'Damaged', 'Expired', 'Other'];
         $dateRules = [
             'start_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'end_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
@@ -96,7 +96,6 @@ class StockAdjustmentController extends Controller
                     'Physical Count',
                     'Damaged',
                     'Expired',
-                    'Missing',
                     'Other',
                 ]),
             ],
