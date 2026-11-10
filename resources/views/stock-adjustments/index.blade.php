@@ -71,6 +71,7 @@
                     <th scope="col" class="px-4 py-3.5 text-right font-semibold">New</th>
                     <th scope="col" class="px-4 py-3.5 text-right font-semibold">Change</th>
                     <th scope="col" class="px-4 py-3.5 font-semibold">Reason</th>
+                    <th scope="col" class="px-4 py-3.5 font-semibold">Remarks</th>
                     <th scope="col" class="px-4 py-3.5 font-semibold">Created at</th>
                 </tr>
             </thead>
@@ -84,6 +85,7 @@
                         <td class="px-4 py-3.5 text-right font-semibold text-slate-900">{{ number_format($adjustment->new_quantity) }}</td>
                         <td class="px-4 py-3.5 text-right font-semibold {{ $difference >= 0 ? 'text-emerald-700' : 'text-rose-700' }}">{{ $difference > 0 ? '+' : '' }}{{ number_format($difference) }}</td>
                         <td class="px-4 py-3.5"><span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{{ $adjustment->reason }}</span></td>
+                        <td class="px-4 py-3.5">{{ $adjustment->remarks ?? 'N/A' }}</td>
                         <td class="px-4 py-3.5 text-xs"><span class="block font-medium text-slate-700">{{ $adjustment->created_at?->format('M d, Y') }}</span><span class="mt-0.5 block text-slate-400">{{ $adjustment->created_at?->format('h:i A') }}</span></td>
                     </tr>
                 @empty
