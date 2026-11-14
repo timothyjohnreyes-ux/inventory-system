@@ -89,7 +89,7 @@
                         <td class="px-4 py-3.5 text-xs"><span class="block font-medium text-slate-700">{{ $adjustment->created_at?->format('M d, Y') }}</span><span class="mt-0.5 block text-slate-400">{{ $adjustment->created_at?->format('h:i A') }}</span></td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="px-6 py-16 text-center"><p class="text-base font-semibold text-slate-900">No stock adjustments found</p><p class="mt-1 text-sm text-slate-500">Try a different search or reason.</p></td></tr>
+                    <tr><td colspan="8" class="px-6 py-16 text-center"><p class="text-base font-semibold text-slate-900">No stock adjustments found</p><p class="mt-1 text-sm text-slate-500">Try a different search or reason.</p></td></tr>
                 @endforelse
             </tbody>
         </table>
